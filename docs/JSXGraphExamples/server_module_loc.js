@@ -4,7 +4,7 @@ function ConnectedToIllias(){
 }
 
 //Writes the location of the stylesheet into the Calling Website.
-document.write('<link rel="stylesheet" type="text/css" href="indexILIAS.css" />');
+document.write('<link rel="stylesheet" type="text/css" href="/indexILIAS.css" />');
 
 //The Try and Catch Blocks are nessesary to ensure that the Script tries all three modules.
 try{
