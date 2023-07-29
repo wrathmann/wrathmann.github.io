@@ -1,10 +1,16 @@
 ---
-title  Index page
+title:  Index page
 usingmathjax: true
 theme: minia
 ---
 
-Welcome!
+# JSXGraph Example collection
 
+## Calculus (univariate)
 
-[JSXGraph Exmaple](./JSXGraphExamples/jsxhtml.html)
+[Derivative of a function](./JSXGraphExamples/Calculus-Derivative.html) (h-method)
+
+## Calculus (multivariate)
+The development of these applets where supportet by ERASMUS+ project [IDIAM](idiamath.github.io)
+
+[Tangentplane](./JSXGraphExamples/jsxhtml.html)

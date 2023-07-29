@@ -1,0 +1,95 @@
+
+.mw-plusminus-null { color: rgb(170, 170, 170); }
+.texvc { direction: ltr; unicode-bidi: embed; }
+img.tex { vertical-align: middle; }
+span.texhtml { font-family: serif; }
+li span.deleted, span.history-deleted { text-decoration: line-through; color: rgb(136, 136, 136); font-style: italic; }
+
+body { margin: 10pt; padding: 0pt; background: transparent; font-family: sans-serif; font-style: normal; font-variant: normal; font-weight: normal; font-size: 14px; line-height: normal; font-size-adjust: none; font-stretch: normal; -x-system-font: none; color: black; }
+.visualClear { clear: both; }
+/*able { font-size: 100%; color: black; background-color: white; } */
+a { background: transparent none repeat scroll 0% 0%; text-decoration: none; color: rgb(0, 43, 184); }
+a:visited { color: rgb(90, 54, 150); }
+a:active { color: rgb(250, 167, 0); }
+a:hover { text-decoration: underline; }
+a.stub { color: rgb(119, 34, 51); }
+a.new, #p-personal a.new { color: rgb(186, 0, 0); }
+a.new:visited, #p-personal a.new:visited { color: rgb(165, 88, 88); }
+img { border: medium none ; vertical-align: middle; }
+p { margin: 0.4em 0pt 0.5em; line-height: 1.5em; }
+p img { margin: 0pt; }
+p.copyright { font-size: 71%; }
+hr { border: 0pt none ; margin: 0.2em 0pt; height: 1px; color: rgb(170, 170, 170); background-color: rgb(170, 170, 170); }
+h1, h2, h3, h4, h5, h6 { border-bottom: 1px solid rgb(170, 170, 170); margin: 0pt; background: transparent none repeat scroll 0% 0%; color: black; font-weight: normal; padding-top: 0.5em; padding-bottom: 0.17em; }
+h1 { font-size: 135%; }
+h1 .editsection { font-size: 53%; }
+h2 { font-size: 150%; }
+h2 .editsection { font-size: 67%; }
+h3, h4, h5, h6 { border-bottom: medium none; font-weight: bold; }
+h3 { font-size: 132%; }
+h3 .editsection { font-size: 76%; font-weight: normal; }
+h4 { font-size: 116%; }
+h4 .editsection { font-size: 86%; font-weight: normal; }
+h5 { font-size: 100%; }
+h5 .editsection { font-weight: normal; }
+h6 { font-size: 80%; }
+h6 .editsection { font-size: 125%; font-weight: normal; }
+ul { margin: 0.3em 0pt 0pt 1.5em; padding: 0pt; line-height: 1.5em; list-style-type: square; list-style-image: url('bullet.gif'); }
+ol { margin: 0.3em 0pt 0pt 3.2em; padding: 0pt; line-height: 1.5em; list-style-image: none; }
+li { margin-bottom: 0.1em; }
+dt { font-weight: bold; margin-bottom: 0.1em; }
+dl { margin-top: 0.2em; margin-bottom: 0.5em; }
+dd { line-height: 1.5em; margin-left: 2em; margin-bottom: 0.1em; }
+fieldset { border: 1px solid rgb(47, 111, 171); margin: 1em 0pt; padding: 0pt 1em 1em; line-height: 1.5em; }
+fieldset.nested { margin: 0pt 0pt 0.5em; padding: 0pt 0.5em 0.5em; }
+legend { padding: 0.5em; font-size: 150%; }
+form { border: medium none ; margin: 0pt; }
+textarea { padding: 0.1em; width: 100%; }
+input.historysubmit { padding: 0pt 0.3em 0.3em ! important; font-size: 94%; cursor: pointer; height: 1.7em ! important; margin-left: 1.6em; }
+select { vertical-align: top; }
+abbr, acronym, .explain { border-bottom: 1px dotted black; background: transparent none repeat scroll 0% 0%; color: black; cursor: help; }
+q { font-family: Times,"Times New Roman",serif; font-style: italic; }
+code { background-color: rgb(249, 249, 249); }
+pre { border: 1px dashed rgb(47, 111, 171); padding: 1em; color: black; background-color: rgb(249, 249, 249); line-height: 1.1em; }
+#siteSub { display: none; }
+
+/*.jxgbox { margin:10pt; border: 1px solid #D2D4D5; overflow: hidden; position: relative; background-color: rgb(255, 255, 255); -moz-border-radius-topleft: 10px; -moz-border-radius-topright: 10px; -moz-border-radius-bottomright: 10px; -moz-border-radius-bottomleft: 10px; }
+.JXGtext { margin: 0px; padding: 0px; background-color: transparent; font-family: Arial,Helvetica,Geneva }
+
+*/
+
+.jxgbox {
+    /* for IE 7 */
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #356AA0;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -ms-touch-action: none;
+}
+
+.JXGtext {
+    /* May produce artefacts in IE. Solution: setting a color explicitly. */
+    background-color: transparent;
+    font-family: Arial, Helvetica, Geneva, sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+.JXGinfobox {
+    border-style: none;
+    border-width: 1px;
+    border-color: black;
+}
+
+.JXGimage {
+    opacity: 1.0;
+}
+
+.JXGimageHighlight {
+    opacity: 0.6;
+}
+
