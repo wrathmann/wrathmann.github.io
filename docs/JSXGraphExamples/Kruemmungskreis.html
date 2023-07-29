@@ -1,0 +1,121 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+
+	<!--Set these Flags to true to enable the Modules-->
+	<script type="text/javascript">
+		useJsxGraph = true;
+		useMathJax = true;
+		useSageCell = false;
+
+		if (useSageCell == true) {
+			//MathJax is included in SageCell
+			useMathJax = false;
+		};
+	</script>
+
+
+	<!--Location of the Server-Script in the Illias-System-->
+	<script type="text/javascript" src="/server_module_loc.js"></script>
+	<!--	<script type="text/javascript" src="../../Studon/server_module.js"></script>-->
+
+	<!--Configuration of SageCell-->
+	<script type="text/javascript">
+		if (useSageCell == true) {
+			//Make the div with id 'sagecell' a Sage cell
+			sagecell.makeSagecell({
+				inputLocation: '#sagecell',
+				template: sagecell.templates.minimal,
+				evalButtonText: 'Activate'
+			});
+			//Make any div with class 'compute' a Sage cell
+			sagecell.makeSagecell({
+				inputLocation: 'div.compute',
+				evalButtonText: 'Evaluate'
+			});
+		};
+	</script>
+
+	<title>h-Methode</title>
+</head>
+
+<body>
+
+	<h1 class="firstHeading">
+		Kr&uuml;mmungskreis an eine Funktion</h1>
+	<p>
+		Gegeben ist die Funktion
+		<em> f(x) = 1/8 ((x-2)(x+2))<sup>2</sup></em>
+		Dargestellt werden die Tagente und der
+		Kr&uuml;mmungskreis
+		im Punkt <em>(x<sub>0</sub>,f(x<sub>0</sub>))</em> und der
+	</p>
+	<center>
+		<div id="box1" class="jxgbox" style="width:400px; height:300px; "></div>
+	</center>
+
+	<br clear="all">
+	<script language="JavaScript">
+		var b1 = JXG.JSXGraph.initBoard('box1', { originX: 200, originY: 260, unitX: 50, unitY: 50, grid: true });
+		b1.snapToGrid = true;
+		b1.suspendUpdate();
+		var b1axisx = b1.createElement('axis', [[0, 0], [1, 0]], {});
+		var b1axisy = b1.createElement('axis', [[0, 0], [0, 1]], {});
+		// a = b1.createElement('slider', [[0,-4],[4,-4],[-1,0.5,1]],{name:'a;'});
+		// b = b1.createElement('slider', [[0,-4.5],[4,-4.5],[-1,0,1]],{name:'b;'});
+		var f = function (x) {
+			return 0.125 * Math.pow((x - 2) * (x + 2), 2);
+			//return Math.sin(x);
+		};
+
+		var Df = JXG.Math.Numerics.D(f);
+		/*
+		var Df = function(x){
+			return JXG.Math.Numerics.D(f,x);
+		}
+		*/
+		var D2f = JXG.Math.Numerics.D(Df);
+
+
+		var graph = b1.createElement('functiongraph', [f], { strokeColor: '#00ff00' });
+		var c = b1.createElement('glider', [0, 0, graph], { name: 'x_0;' });
+		var p1 = b1.createElement('point', [function () { return c.X() }, function () { return f(c.X()); }], { name: 'f(0)', visible: false });
+		var p2 = b1.createElement('point', [function () { return c.X() - 1 }, function () { return f(c.X()) - Df(c.X()); }], { name: 'f(-1)', visible: false });
+		var tangentf = b1.createElement('line', [p1, p2], { color: '#aaaaff' });
+
+		var kruemmung = function (t) {
+		}
+
+		var mkreis = function (t) {
+			// funktionswert
+			var fvalue = f(t);
+			// wert der ableitung
+			var dfvalue = Df(t);
+			// Richtung der Normalen
+			var normalex = -dfvalue;
+			var normaley = 1;
+			var dfvalue2 = Math.pow(dfvalue, 2);
+			var ddfvalue = Math.min(D2f(t), 1000);
+			var ddfvalue = Math.max(ddfvalue, -1000);
+			var normvec = 1 + dfvalue2;
+			var radius = normvec / ddfvalue
+			var a = [];
+			a[0] = -radius * dfvalue;
+			a[1] = radius;
+			return a;
+		}
+
+		var m1 = b1.createElement('point', [function () { a = mkreis(c.X()); return c.X() + a[0]; }, function () { a = mkreis(c.X()); return f(c.X()) + a[1]; }], { name: 'M', visible: true });
+		var c1 = b1.createElement('circle', [m1, c], { name: 'Kr&uuml;umgskreis', visible: true });
+
+		b1.unsuspendUpdate();
+
+	</script>
+	</center>
+
+	</p>
+
+</body>
+
+</html>
