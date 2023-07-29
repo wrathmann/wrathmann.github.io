@@ -1,0 +1,124 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+
+    <!--Set these Flags to true to enable the Modules-->
+    <script type="text/javascript">
+        useJsxGraph = true;
+        useMathJax = true;
+        useSageCell = false;
+
+        if (useSageCell == true) {
+            //MathJax is included in SageCell
+            useMathJax = false;
+        };
+    </script>
+
+
+    <!--Location of the Server-Script in the Illias-System-->
+    <script type="text/javascript" src="https://wrathmann.github.io/JSXGraphExamples/server_module_loc.js"></script>
+    <!--	<script type="text/javascript" src="../../Studon/server_module.js"></script>-->
+
+    <!--Configuration of SageCell-->
+    <script type="text/javascript">
+        if (useSageCell == true) {
+            //Make the div with id 'sagecell' a Sage cell
+            sagecell.makeSagecell({
+                inputLocation: '#sagecell',
+                template: sagecell.templates.minimal,
+                evalButtonText: 'Activate'
+            });
+            //Make any div with class 'compute' a Sage cell
+            sagecell.makeSagecell({
+                inputLocation: 'div.compute',
+                evalButtonText: 'Evaluate'
+            });
+        };
+    </script>
+
+    <title>h-Methode</title>
+</head>
+
+<body>
+
+    <h1 class="firstHeading">
+        Kr&uuml;mmungskreis an eine Funktion</h1>
+    <p>
+        Gegeben ist die Funktion
+        <em> f(x) = 1/8 ((x-2)(x+2))<sup>2</sup></em>
+        Dargestellt werden die Tagente und der
+        Kr&uuml;mmungskreis
+        im Punkt <em>(x<sub>0</sub>,f(x<sub>0</sub>))</em> und der
+    </p>
+    \(f(x)=\)<input id="functionf" value="1/8*((x-2)*(x+2))^2" /> &nbsp;&nbsp;&nbsp;
+    <input value="Anzeigen" onclick="plot()" type="button" /><br />
+<center>
+        <div id="box1" class="jxgbox" style="width:400px; height:300px; "></div>
+    </center>
+    <p>
+    </p>
+
+    <br clear="all">
+    <script language="JavaScript">
+
+        var b1 = JXG.JSXGraph.initBoard('box1', { originX: 200, originY: 260, unitX: 50, unitY: 50, grid: true });
+        b1.snapToGrid = true;
+        b1.suspendUpdate();
+        var b1axisx = b1.create('axis', [[0, 0], [1, 0]], {});
+        var b1axisy = b1.create('axis', [[0, 0], [0, 1]], {});
+        var f, graph, g, Df, D2fc, p1, p2, tangentf, m1, c1,c;
+        plot();
+        function plot() {
+            b1.removeObject(c1)
+            b1.removeObject(m1)
+            b1.removeObject(tangentf)
+            b1.removeObject(p2)
+            b1.removeObject(p1)
+            b1.removeObject(c)
+            b1.removeObject(graph)
+            f = b1.jc.snippet(document.getElementById("functionf").value, true, 'x');
+            Df = JXG.Math.Numerics.D(f);
+            D2f = JXG.Math.Numerics.D(Df);
+            graph = b1.create('functiongraph', [f], { strokeColor: '#00ff00' });
+            c = b1.create('glider', [0, 0, graph], { name: 'x_0;' });
+            p1 = b1.create('point', [function () { return c.X() }, function () { return f(c.X()); }], { name: 'f(0)', visible: false });
+            p2 = b1.create('point', [function () { return c.X() - 1 }, function () { return f(c.X()) - Df(c.X()); }], { name: 'f(-1)', visible: false });
+            tangentf = b1.create('line', [p1, p2], { color: '#aaaaff' });
+            m1 = b1.create('point', [function () { a = mkreis(c.X()); return c.X() + a[0]; }, function () { a = mkreis(c.X()); return f(c.X()) + a[1]; }], { name: 'M', visible: true });
+            c1 = b1.create('circle', [m1, c], { name: 'Kr&uuml;umgskreis', visible: true });
+        }
+        function kruemmung(t) {
+        }
+
+        function mkreis(t) {
+            // funktionswert
+            var fvalue = f(t);
+            // wert der ableitung
+            var dfvalue = Df(t);
+            // Richtung der Normalen
+            var normalex = -dfvalue;
+            var normaley = 1;
+            var dfvalue2 = Math.pow(dfvalue, 2);
+            var ddfvalue = Math.min(D2f(t), 1000);
+            var ddfvalue = Math.max(ddfvalue, -1000);
+            var normvec = 1 + dfvalue2;
+            var radius = normvec / ddfvalue
+            var a = [];
+            a[0] = -radius * dfvalue;
+            a[1] = radius;
+            return a;
+        }
+
+
+        b1.unsuspendUpdate();
+
+    </script>
+    </center>
+
+    </p>
+
+</body>
+
+</html>
