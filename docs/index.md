@@ -22,6 +22,7 @@ The development of these applets where supportet by ERASMUS+ project [IDIAM](idi
 - [Binomial Distribution](./JSXGraphExamples/DistributionBinomial.html)
 - [Poisson Distribution](./JSXGraphExamples/DistributionPoisson.html)
 - [Exponential Distribution](./JSXGraphExamples/DistributionExponential.html)
+- [Uniform Distribution](./JSXGraphExamples/DistributionUniform.html)
 - [Normal Distribution](./JSXGraphExamples/DistributionNormal.html)
 
 ## Differential Equations
