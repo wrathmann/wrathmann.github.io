@@ -1,0 +1,64 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8" src="https://jsxgraph.org/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+
+  <title>Distribution</title>
+</head>
+
+<body>
+
+  <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+  </div>
+
+
+  <h2>Uniform distribution</h2>
+  <p>
+     The densitiy funciton is \(f(x) =\dfrac{1}{b-a}1_{[a,b]}(x) \)
+  </p>
+
+
+  <p>
+    <center>
+      <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+    </center>
+  </p>
+  <script language="JavaScript">
+    "use strict";
+    JXG.Options.text.useMathJax = true;
+    var board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-2, 3, 2, -0.5], axis: true, showCopyright: false });
+    var p1x = board.create('glider', [-1,0,board.defaultAxes.x], {style:1, name:'a'});
+    var p2x = board.create('glider', [1,0,board.defaultAxes.x], {style:1, name:'b'});
+    var p3x = board.create('point', [()=>p1x.X(),()=>(1/(p2x.X()-p1x.X()))], {style:1, name:'a1',visible:false});
+    var p4x = board.create('point', [()=>p2x.X(),()=>(1/(p2x.X()-p1x.X()))], {style:1, name:'b1',visible:false});
+
+    var l1 = board.create('line',[[-10,0],p1x],{strokeWidth:3,straightLast:false});
+    var l2 = board.create('line',[p3x,p4x],{strokeWidth:3,straightFirst:false,straightLast:false});
+    var l3 = board.create('line',[p2x,[10,0]],{strokeWidth:3,straightFirst:false});
+    
+    board.updateConditions = function() {
+	if(p2x.coords.usrCoords[1] <p1x.coords.usrCoords[1]) {
+		p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER,[1,p1x.X()+0.1,0] , board);
+		p2x.update();
+	}
+};
+
+</script>
+  <footer>
+    Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+  </footer>
+
+</html>
