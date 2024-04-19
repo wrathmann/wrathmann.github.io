@@ -13,7 +13,7 @@ theme: minia
 - [Osculating circle (input)](./JSXGraphExamples/Kruemmungskreis-input.html)
 
 ## Calculus (multivariate)
-The development of these applets where supportet by ERASMUS+ project [IDIAM](idiamath.github.io)
+The development of these applets where supportet by ERASMUS+ project [IDIAM](idiamath.github.io). Please look at the [Examples there](https://idiamath.github.io/JSXGraphExamples/JSXGraphExamples.html) als well.
 
 [Tangentplane](./JSXGraphExamples/Tangent.html)
 
@@ -23,3 +23,6 @@ The development of these applets where supportet by ERASMUS+ project [IDIAM](idi
 - [Poisson Distribution](./JSXGraphExamples/DistributionPoisson.html)
 - [Exponential Distribution](./JSXGraphExamples/DistributionExponential.html)
 - [Normal Distribution](./JSXGraphExamples/DistributionNormal.html)
+
+## Differential Equations
+- [1d heat equation](./JSXGraphExamples/SolutionHeatEquationStat.html)
