@@ -15,4 +15,11 @@ theme: minia
 ## Calculus (multivariate)
 The development of these applets where supportet by ERASMUS+ project [IDIAM](idiamath.github.io)
 
-[Tangentplane](./JSXGraphExamples/jsxhtml.html)
+[Tangentplane](./JSXGraphExamples/Tangent.html)
+
+## Probablity Distributions
+
+- [Binomial Distribution](./JSXGraphExamples/DistributionBinomial.html)
+- [Poisson Distribution](./JSXGraphExamples/DistributionPoisson.html)
+- [Exponential Distribution](./JSXGraphExamples/DistributionExponential.html)
+- [Normal Distribution](./JSXGraphExamples/DistributionNormal.html)

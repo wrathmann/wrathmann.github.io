@@ -3,42 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-
-    <!--Set these Flags to true to enable the Modules-->
-    <script type="text/javascript">
-        useJsxGraph = true;
-        useMathJax = true;
-        useSageCell = false;
-
-        if (useSageCell == true) {
-            //MathJax is included in SageCell
-            useMathJax = false;
-        };
+    <!--
+    <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
     </script>
-
-
-    <!--Location of the Server-Script in the Illias-System-->
-    <script type="text/javascript" src="https://wrathmann.github.io/JSXGraphExamples/server_module_loc.js"></script>
-    <!--	<script type="text/javascript" src="../../Studon/server_module.js"></script>-->
-
-    <!--Configuration of SageCell-->
-    <script type="text/javascript">
-        if (useSageCell == true) {
-            //Make the div with id 'sagecell' a Sage cell
-            sagecell.makeSagecell({
-                inputLocation: '#sagecell',
-                template: sagecell.templates.minimal,
-                evalButtonText: 'Activate'
-            });
-            //Make any div with class 'compute' a Sage cell
-            sagecell.makeSagecell({
-                inputLocation: 'div.compute',
-                evalButtonText: 'Evaluate'
-            });
-        };
+    -->
+    <script type="text/javascript" charset="UTF-8"
+    src="https://jsxgraph.org/distrib/jsxgraphcore.js">
     </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+  <style>
+    body {
+  font-family: sans-serif;
+  }
+  </style>
 
-    <title>h-Methode</title>
+    <title>Tangente und Krümmungskreis</title>
 </head>
 
 <body>
@@ -47,10 +30,10 @@
         Kr&uuml;mmungskreis an eine Funktion</h1>
     <p>
         Gegeben ist die Funktion
-        <em> f(x) = 1/8 ((x-2)(x+2))<sup>2</sup></em>
+        \(f(x) = \frac18 ((x-2)(x+2))^2\)
         Dargestellt werden die Tagente und der
         Kr&uuml;mmungskreis
-        im Punkt <em>(x<sub>0</sub>,f(x<sub>0</sub>))</em> und der
+        im Punkt \((x_0,f(x_0))\) und der
     </p>
     \(f(x)=\)<input id="functionf" value="1/8*((x-2)*(x+2))^2" /> &nbsp;&nbsp;&nbsp;
     <input value="Anzeigen" onclick="plot()" type="button" /><br />
@@ -63,35 +46,64 @@
     <br clear="all">
     <script language="JavaScript">
 
-        var b1 = JXG.JSXGraph.initBoard('box1', { originX: 200, originY: 260, unitX: 50, unitY: 50, grid: true });
+        var b1 = JXG.JSXGraph.initBoard('box1', { originX: 200, originY: 260, unitX: 50, unitY: 50, grid: true,axis: true });
         b1.snapToGrid = true;
         b1.suspendUpdate();
-        var b1axisx = b1.create('axis', [[0, 0], [1, 0]], {});
-        var b1axisy = b1.create('axis', [[0, 0], [0, 1]], {});
-        var f, graph, g, Df, D2fc, p1, p2, tangentf, m1, c1,c;
+        var f, graph, g, Df, D2fc, p1, tangentf, m1, c1,c;
+        var strf, strDf, strD2f;
+        var circleList = [];
+
+        // toggle buttons
+        bTangent = b1.create(
+          "button",
+          [
+            2,
+            4.5,
+            "Tangente",
+            function () {
+              toggleList([tangentf]);
+            },
+          ],
+          { fixed: true }
+        );
+        bCircle = b1.create(
+          "button",
+          [
+            2,
+            4,
+            "Kreis",
+            function () {
+              toggleList(circleList);
+            },
+          ],
+          { fixed: true }
+        );
+        // plot objects
         plot();
+        
         function plot() {
             b1.removeObject(c1)
             b1.removeObject(m1)
             b1.removeObject(tangentf)
-            b1.removeObject(p2)
             b1.removeObject(p1)
             b1.removeObject(c)
             b1.removeObject(graph)
-            f = b1.jc.snippet(document.getElementById("functionf").value, true, 'x');
-            Df = JXG.Math.Numerics.D(f);
-            D2f = JXG.Math.Numerics.D(Df);
-            graph = b1.create('functiongraph', [f], { strokeColor: '#00ff00' });
-            c = b1.create('glider', [0, 0, graph], { name: 'x_0;' });
-            p1 = b1.create('point', [function () { return c.X() }, function () { return f(c.X()); }], { name: 'f(0)', visible: false });
-            p2 = b1.create('point', [function () { return c.X() - 1 }, function () { return f(c.X()) - Df(c.X()); }], { name: 'f(-1)', visible: false });
-            tangentf = b1.create('line', [p1, p2], { color: '#aaaaff' });
+            // read strings for the functions
+            strf = document.getElementById("functionf").value;
+            strDf = b1.jc.manipulate("D("+strf+",x);");
+            strD2f = b1.jc.manipulate("D("+strDf+",x);");
+            f = b1.jc.snippet(strf, true, 'x');
+            Df = b1.jc.snippet(strDf, true, 'x');
+            D2f = b1.jc.snippet(strD2f, true, 'x');
+            graph = b1.create('functiongraph', [f]);
+            c = b1.create('glider', [0, 0, graph], { name: '(x_0,f(x_0))' });
+            tangentf = b1.create('tangent', [c], { color: '#aaaaff' });
             m1 = b1.create('point', [function () { a = mkreis(c.X()); return c.X() + a[0]; }, function () { a = mkreis(c.X()); return f(c.X()) + a[1]; }], { name: 'M', visible: true });
             c1 = b1.create('circle', [m1, c], { name: 'Kr&uuml;umgskreis', visible: true });
+            // create list to toggle osculating circle
+            circleList.push(c1,m1);
         }
-        function kruemmung(t) {
-        }
-
+        
         function mkreis(t) {
             // funktionswert
             var fvalue = f(t);
@@ -111,7 +123,20 @@
             return a;
         }
 
-
+        function toggleList(inputList) {
+          for (let iloop = 0; iloop < inputList.length; iloop++) {
+            if (JXG.exists(inputList[iloop])) {
+              if (inputList[iloop].getAttribute("visible")) {
+                inputList[iloop].setAttribute({ visible: false });
+              } else {
+                inputList[iloop].setAttribute({ visible: true });
+                inputList[iloop].show();
+              }
+              inputList[iloop].update();
+            }
+          }
+        }
+        
         b1.unsuspendUpdate();
 
     </script>
