@@ -15,7 +15,7 @@ theme: minia
 ## Calculus (multivariate)
 The development of these applets where supportet by ERASMUS+ project KA226 [IDIAM](idiamath.github.io). Please look at the [Examples there](https://idiamath.github.io/JSXGraphExamples/JSXGraphExamples.html) als well.
 
-- [Tangentplane](./JSXGraphExamples/Tangent.html)
+- [Tangentplane](./JSXGraphExamples/Tangentplane.html)
 
 
 
