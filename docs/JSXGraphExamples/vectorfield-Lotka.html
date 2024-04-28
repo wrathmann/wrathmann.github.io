@@ -1,0 +1,182 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        </script>
+  <style>
+    body {
+        font-family: sans-serif;
+    }
+  </style>
+
+    <title>Lotka-Voltera</title>
+</head>
+
+<body>
+
+    <h1>Lotka-Voltera</h1>
+    <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;"></div>
+    <br clear="all">
+    <script language="JavaScript">
+var jxgbox = document.getElementById('jxgbox');
+
+var s,o;
+var board, point;
+var f, fx, fy, ftxt, field = [];
+var inputfx, inputfy;
+var curveN, curveh, curveC, curveG, curveG1, curveG2;
+var bFieldT, bFieldS, bTraject;
+
+var init = function() {
+  board = JXG.JSXGraph.initBoard('jxgbox', {
+    axis: true,
+    boundingbox: [-1, 15, 15, -1]
+  });
+  inputfx = board.create('input', [0.5, 14, '0.3*x-0.3*x*y-0.01*x*x', 'f_1(x,y)=']);
+  inputfy = board.create('input', [0.5, 13, '-0.7*y+0.2*y*x-0.01*y*y', 'f_2(x,y)=']);
+  s = board.create('slider', [
+    [8, 14],
+    [10, 14],
+    [0, 0.1, 1]
+  ], {
+    name: 'length'
+  });
+  o = board.create('slider', [
+    [8, 13],
+    [10, 13],
+    [0, 0.5, 1]
+  ], {
+    name: 'opacity'
+  });
+  
+  // trajectory
+  point = board.create('point', [5,5], {name:'(x_0,y_0)', color:'red'});
+  curveN = board.create('slider', [
+    [8, 12],
+    [10, 12],
+    [20, 200, 200]
+  ], {
+    name: 'N',snapWidth:1
+  });
+  curveh = board.create('slider', [
+    [8, 11],
+    [10, 11],
+    [0.05, 0.2, 0.8]
+  ], {
+    name: 'h',snapWidth:0.05
+  });
+  bFieldT = board.create('button',[0.5,11,"vector field",
+            function () {toggleList([field]);},
+          ],
+          { fixed: true }
+        );
+        
+bFieldS = board.create(
+          "button",
+          [0.5,12,"set vector field",
+            function () {plot();},
+          ],
+          { fixed: true }
+        );
+bTraject = board.create("button",[0.5,10,"trajectory",
+            function () {toggleList([curveC,point]);},
+          ],
+          { fixed: true }
+        );
+/*
+*/
+};
+
+var plot = function() {
+
+  board.removeObject(field);
+  board.removeObject(curveG);
+  board.removeObject(curveC);
+  fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
+  fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
+  //fxdy = board.jc.snippet("-sin(x)",true,"x,y");
+  //fydx = board.jc.snippet("cos(x)",true,"x,y");
+  // build vector valued function of one variable
+  ftxt = '['+inputfx.Value()+','+inputfy.Value()+']';
+  ftxt = ftxt.replace(/x/g,"x[0]");
+  ftxt = ftxt.replace(/y/g,"x[1]");
+  //fxdy = fxdy.replace(/x/g,"x[0]");
+  //fydx = fydx.replace(/y/g,"x[1]");
+  
+  // generatet function used in Numerics.rungeKutta
+  f  = board.jc.snippet(ftxt, true, 't,x');
+
+  field = board.create('vectorfield', [
+    [fx, fy],
+    [0, 20, 10],
+    [0, 20, 10],0.5], {
+    strokeWidth: 1.5,
+    highlightStrokeWidth: 0.5,
+    strokeColor: JXG.palette.red,
+    strokeOpacity: ()=>o.Value(),
+    highlightStrokeColor: JXG.palette.blue,
+    scale: ()=>s.Value(),
+    arrowHead: {
+      enabled: true,
+      size: 8,
+      angle: Math.PI / 16
+    },
+    visible: true
+  });
+  curveC = board.create('curve', [[], []],{strokeWidth:3});
+  curveC.updateDataArray= function(){
+    this.dataX=[];
+	  this.dataY=[];
+    var h = curveh.Value();
+    var N = curveN.Value();
+    var data = JXG.Math.Numerics.rungeKutta('rk4', [point.X(),point.Y()], [0,h*N],N,f);
+    for(var i=0; i<curveN.Value(); i++){
+        this.dataX[i]=data[i][0];
+        this.dataY[i]=data[i][1];
+    }
+    //board.update();    
+    
+   };
+   /*
+   curveG = board.create('glider',[point.X()+1,point.Y(),curveC]);
+   curveG1 = board.create('point',
+            [()=>point.X()-JXG.Math.cos(fxdy([point.X(),point.Y()])),
+            ()=>point.Y()-JXG.Math.sin(fxdy([point.X(),point.Y()]))]);
+*/
+if (JXG.exists(point)) 
+  {point.setAttribute({visible:true});
+  }
+}
+
+init();
+plot();
+
+
+function toggleList(inputList) {
+          for (let iloop = 0; iloop < inputList.length; iloop++) {
+            if (JXG.exists(inputList[iloop])) {
+              if (inputList[iloop].getAttribute("visible")) {
+                inputList[iloop].setAttribute({ visible: false });
+              } else {
+                inputList[iloop].setAttribute({ visible: true });
+                inputList[iloop].show();
+              }
+              inputList[iloop].update();
+            }
+          }
+        }
+
+    </script>
+
+    </p>
+
+</body>
+
+</html>

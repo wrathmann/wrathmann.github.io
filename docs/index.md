@@ -15,6 +15,12 @@ theme: minia
 ## Calculus (multivariate)
 The development of these applets where supportet by ERASMUS+ project [IDIAM](idiamath.github.io). Please look at the [Examples there](https://idiamath.github.io/JSXGraphExamples/JSXGraphExamples.html) als well.
 
+- [Show 2D vectorfields](./JSXGraphExamples/Vektorfelder-anzeigen-input.html) In this applet the vectorfield can be edited via input fields.
+
+Most example where supported by ERASMUS+ IDIAM KA226
+
+- [Lottka-Volterra](./JSXGraphExamples/vectorfield-Lotka.html) 
+
 [Tangentplane](./JSXGraphExamples/Tangent.html)
 
 ## Probablity Distributions
