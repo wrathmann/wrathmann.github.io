@@ -101,9 +101,6 @@ var plot = function() {
   board.removeObject(curveC);
   fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
   fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
-  //fxdy = board.jc.snippet("-sin(x)",true,"x,y");
-  //fydx = board.jc.snippet("cos(x)",true,"x,y");
-  // build vector valued function of one variable
   ftxt = '['+inputfx.Value()+','+inputfy.Value()+']';
   ftxt = ftxt.replace(/x/g,"x[0]");
   ftxt = ftxt.replace(/y/g,"x[1]");
@@ -141,15 +138,8 @@ var plot = function() {
         this.dataX[i]=data[i][0];
         this.dataY[i]=data[i][1];
     }
-    //board.update();    
     
    };
-   /*
-   curveG = board.create('glider',[point.X()+1,point.Y(),curveC]);
-   curveG1 = board.create('point',
-            [()=>point.X()-JXG.Math.cos(fxdy([point.X(),point.Y()])),
-            ()=>point.Y()-JXG.Math.sin(fxdy([point.X(),point.Y()]))]);
-*/
 if (JXG.exists(point)) 
   {point.setAttribute({visible:true});
   }
