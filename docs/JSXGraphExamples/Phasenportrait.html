@@ -32,31 +32,31 @@
 <h2> Handhabung</h2>
 <h3>Matrixeintr&auml;ge, Inhomogenit&auml;t</h3>
 <p>
-    &Uuml;ber die Schieberegler a_11, a_12, a_21 und a_22 k&ouml;nnen die Matrixeintr&auml;ge <emph>A</emph> der
+    &Uuml;ber die Schieberegler \(a_{11}, a_{12}, a_{21}\) und \(a_{22}\) k&ouml;nnen die Matrixeintr&auml;ge \(A\) der
         Differenzialgleichung ver&auml;ndert werden.
-        Werte zwischen [-1,1] sind m&ouml;glich. Somit k&ouml;nnen die Eigenwerte <i>A</i> der Matrix ver&auml;ndert
+        Werte zwischen [-1,1] sind m&ouml;glich. Somit k&ouml;nnen die Eigenwerte \(A\) der Matrix ver&auml;ndert
         werden und das zugeh&ouml;rige L&ouml;sungsverhalten studiert werden. So lassen sich die
         verschiedenen Phasenportraits aus dem Skript nachvollziehen.
 </p>
 <p>
-    Durch die Ver&auml;nderung der Eintr&auml;ge in der Matrix <i>A</i> und der Inhomogenit&auml;t <i>b</i> kann auch
+    Durch die Ver&auml;nderung der Eintr&auml;ge in der Matrix \(A\) und der Inhomogenit&auml;t \(b\) kann auch
     die Gleichgewichtsl&ouml;sung ver&auml;ndert werden.
 </p>
 
 
 <h3>Startwert</h3>
 <p>
-    Der <font color=red>rote</font> Punkt <i>(x<sub>0</sub>,y<sub>0</sub>)</i> ist der Startwert f&uuml;r die
+    Der <font color=red>rote</font> Punkt \((y_1^0,y_2^0)\) ist der Startwert f&uuml;r die
     L&ouml;sung
     der Dgl. Durch Verschieben dieses Punktes kann der Einluss des Startwertes
     beobachtet werden. Dabei sind zwei Trajektorien zu sehen:
 <ul>
     <li>1. Die <font color=blue>blaue</font> Trajektrorie geh&ouml;rt
-        zum variierenden Startpunkt <i>(y<sub>1</sub><sup>0</sup>,y<sub>2</sub><sup>0</sup>)</i>.
+        zum variierenden Startpunkt \((y_1^0,y_2^0)\).
     <li>2. Die <font color=red>rote</font> Trajektrorie ist die
         Vergleichstrajektorie und kann durch Klicke auf <b>Setze
             Referenzl&ouml;sung</b> gesetzt werden.
-        /ul>
+        </ul>
         </p>
 
         <p>
@@ -68,19 +68,20 @@
         </span>
         <div id="jxgbox" class="jxgbox" style="width:800px; height:600px;"></div>
         <script language="JavaScript">
+            JXG.Options.text.useMathJax = true;
             var board = JXG.JSXGraph.initBoard('jxgbox', { originX: 300, originY: 300, unitX: 20, unitY: 20, axis: false, grid: false });
             var xax = board.create('axis', [[0, 0], [1, 0]]);
             var yax = board.create('axis', [[0, 0], [0, 1]]);
-            var a12 = board.create('slider', [[4.0, 14.0], [9.0, 14.0], [-1.0, 1.0, 1.0]], { name: 'a_12', strokeColor: 'black', fillColor: 'black' });
-            var a22 = board.create('slider', [[4.0, 12.0], [9.0, 12.0], [-1.0, -0.1, 1.0]], { name: 'a_22', strokeColor: 'black', fillColor: 'black' });
-            var a11 = board.create('slider', [[-9.0, 14.0], [-4.0, 14.0], [-1.0, -0.0, 1.0]], { name: 'a_11', strokeColor: 'black', fillColor: 'black' });
-            var a21 = board.create('slider', [[-9.0, 12.0], [-4.0, 12.0], [-1.0, -1.0, 1.0]], { name: 'a_21', strokeColor: 'black', fillColor: 'black' });
-            var b1 = board.create('slider', [[17.0, 14.0], [22.0, 14.0], [-5.0, -2.0, 5.0]], { name: 'b_1', strokeColor: 'black', fillColor: 'black' });
-            var b2 = board.create('slider', [[17.0, 12.0], [22.0, 12.0], [-5.0, 2.0, 5.0]], { name: 'b_2', strokeColor: 'black', fillColor: 'black' });
+            var a12 = board.create('slider', [[4.0, 14.0], [9.0, 14.0], [-1.0, 1.0, 1.0]], { name: '\\(a_{12}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
+            var a22 = board.create('slider', [[4.0, 12.0], [9.0, 12.0], [-1.0, -0.1, 1.0]], { name: '\\(a_{22}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
+            var a11 = board.create('slider', [[-9.0, 14.0], [-4.0, 14.0], [-1.0, -0.0, 1.0]], { name: '\\(a_{11}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
+            var a21 = board.create('slider', [[-9.0, 12.0], [-4.0, 12.0], [-1.0, -1.0, 1.0]], { name: '\\(a_{21}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
+            var b1 = board.create('slider', [[17.0, 14.0], [22.0, 14.0], [-5.0, -2.0, 5.0]], { name: '\\(b_{1}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
+            var b2 = board.create('slider', [[17.0, 12.0], [22.0, 12.0], [-5.0, 2.0, 5.0]], { name: '\\(b_{2}\\)', snapWidth:0.05, strokeColor: 'black', fillColor: 'black' });
 
             board.suspendUpdate();
 
-            var P = board.create('point', [12, 0], { name: '(y_1^0,y_2^0)' });
+            var P = board.create('point', [12, 0], { name: '\\((y_1^0,y_2^0)\\)' });
 
             var g3 = null;
             // anzahl der Punkte zum Loesen der ODE
@@ -171,7 +172,7 @@
             // Orientierung der Referenztrajektorie
 
             var text31 = board.create('text',
-                [function () { return [g3.dataX[N + Narrow + 2] + 0.5, g3.dataY[N + Narrow + 2]]; }, "t &le; t<sub>0</sub>"]);
+                [function () { return [g3.dataX[N + Narrow + 2] + 0.5, g3.dataY[N + Narrow + 2]]; }, "\\(t\\leqslant t_0\\)"]);
 
 
             var direction3 = board.create('arrow',
@@ -180,7 +181,7 @@
                 { strokeWidth: directionSize, strokeColor: 'red' });
 
             var text41 = board.create('text',
-                [function () { return [g3.dataX[N - Narrow] + 0.5, g3.dataY[N - Narrow]]; }, "t &ge; t<sub>0</sub>"]);
+                [function () { return [g3.dataX[N - Narrow] + 0.5, g3.dataY[N - Narrow]]; }, "\\(t\\geqslant t_0\\)"]);
 
             var direction4 = board.create('arrow',
                 [function () { return [g3.dataX[N - Narrow], g3.dataY[N - Narrow]]; },
@@ -205,7 +206,7 @@
                 { strokeWidth: directionSize, strokeColor: 'blue' });
 
             var text11 = board.create('text',
-                [function () { return [g5.dataX[Narrow] + 0.5, g5.dataY[Narrow]]; }, "t &ge; t<sub>0</sub>"]);
+                [function () { return [g5.dataX[Narrow] + 0.5, g5.dataY[Narrow]]; }, "\\(t\\geqslant t_0\\)"]);
 
             var g6 = board.create('curve', [datapred, dataprey], { strokeColor: 'blue', strokeWidth: '2px' });
             g6.updateDataArray = function () {
@@ -224,7 +225,7 @@
                 { strokeWidth: directionSize, strokeColor: 'blue' });
 
             text21 = board.create('text',
-                [function () { return [g6.dataX[Narrow + 2] + 0.5, g6.dataY[Narrow + 2]]; }, "t &le; t<sub>0</sub>"]);
+                [function () { return [g6.dataX[Narrow + 2] + 0.5, g6.dataY[Narrow + 2]]; }, "\\(t\\leqslant t_0\\)"]);
 
             board.unsuspendUpdate();
 
