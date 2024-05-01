@@ -52,13 +52,14 @@
         var pdf = board.create('functiongraph', [pdffun], { strokeWidth: 2 });
 
 
-        var f = board.create('functiongraph', [function (x) {
+        var cdf = function (x) {
           if (x < 0) {
             return 0;
           }
           return 1 - Math.exp(-lambda.Value() * x);
-        }]);
+        }
 
+        var f = board.create('functiongraph', [cdf]);
         var p1x = board.create('glider', [0.1, 0, board.defaultAxes.x], { style: 1, name: 'a' });
         var p2x = board.create('glider', [1, 0, board.defaultAxes.x], { style: 1, name: 'b' });
         board.updateConditions = function () {
@@ -66,7 +67,15 @@
             p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X() + 0.1, 0], board);
             p2x.update();
           }
+          
+          if (p1x.coords.usrCoords[1]<0){
+            p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, 0, 0], board);
+            p1x.update();
+          }
+          
         }
+        var pText = board.create('text',
+        [1,4.5,()=>{return '\\(P(a\\leqslant X \\leqslant b)='+(cdf(p2x.X())-cdf(p1x.X())).toFixed(2)+'\\)';}]);
 
         var ProbArea = board.create('curve', [[], []], { strokeWidth: 1, fillColor: JXG.palette.red, fillOpacity: 0.5 });
         ProbArea.updateDataArray = function () {

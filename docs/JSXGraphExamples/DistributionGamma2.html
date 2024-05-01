@@ -67,6 +67,11 @@
                   p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X() + 0.1, 0], board);
                   p2x.update();
                }
+               if (p1x.coords.usrCoords[1] < 0) {
+                  p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, 0, 0], board);
+                  p1x.update();
+
+               }
             }
 
             var ProbArea = board.create('curve', [[], []], { strokeWidth: 1, fillColor: JXG.palette.red, fillOpacity: 0.5 });
@@ -91,6 +96,9 @@
                this.dataY.push(0);
 
             }
+
+            var pText = board.create('text',
+               [3.5, 2.5, () => { return '\\(P(a\\leqslant X \\leqslant b)=' + (gammacdf(p2x.X()) - gammacdf(p1x.X())).toFixed(2) + '\\)'; }]);
 
 
 

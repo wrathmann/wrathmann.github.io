@@ -47,13 +47,16 @@
           return dist;
         }],{strokeWidth:2});
 
-
-        var f = board.create('functiongraph', [function (x) {
+        var cdf = function (x) {
           if (x < 0) {
             return 0;
           }
           return 1 - Math.exp(-lambda.Value() * x);
-        }]);
+        }
+
+        var f = board.create('functiongraph', [cdf]);
+        var p1 = board.create('glider',[1,0,pdf]);
+        var p2 = board.create('point',[()=>{return p1.X();},()=>{return cdf(p1.X());}]);
 
 
       </script>
