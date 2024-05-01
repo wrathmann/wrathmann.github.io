@@ -53,7 +53,7 @@ In the following examples one can highlight probalities $P(a<=X<=b)$.
 - [2x2 System tracectory ODE (Euler, Heun, RK4)](./JSXGraphExamples/ODESystem-Solver.html)
 - [Phasenportrait (inhomogenous)](./JSXGraphExamples/Phasenportrait.html)
 - [System of non-autonomous ODE](./JSXGraphExamples/Non-Autonomous-ODESystem.html)
-- [System of non-autonomous ODE (trajectory and time)](./JSXGraphExamples/Non-Autonomous-ODESystem2.html)
+- [System of non-autonomous ODE (trajectory and time)](./JSXGraphExamples/Non-Autonomous-ODESystem-2.html)
 
 
 ## Interactive Digital Assessement in Mathematics
