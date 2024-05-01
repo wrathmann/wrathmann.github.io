@@ -43,9 +43,11 @@ See the list below or look at the [Examples there](https://idiamath.github.io/JS
 - [Lotka-Voltera](./JSXGraphExamples/vectorfield-Lotka.html) 
 - [2x2 System over time](./JSXGraphExamples/ODE-System2x2-time.html)
 - [2x2 System tracectory](./JSXGraphExamples/ODE-System2x2-portrait.html)
+- [2x2 System tracectory ODE (Euler, Heun, RK4)](./JSXGraphExamples/ODESystem-Solver.html)
 - [Phasenportrait (inhomogenous)](./JSXGraphExamples/Phasenportrait.html)
 - [System of non-autonomous ODE](./JSXGraphExamples/Non-Autonomous-ODESystem.html)
 - [System of non-autonomous ODE (trajectory and time)](./JSXGraphExamples/Non-Autonomous-ODESystem2.html)
+- [System of non-autonomous ODE (Euler, Heun, RK4)](./JSXGraphExamples/ODESystem-Solver.html)
 
 
 ## Interactive Digital Assessement in Mathematics

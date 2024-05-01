@@ -1,0 +1,180 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+  <title>Numerical Methods</title>
+</head>
+
+<body>
+
+  <h1>Numerical Methods</h1>
+  <p>
+    This example demonstrates different RK-Methods, which are implemented in JSXGraph. The inital system is
+    \[\begin{align*}
+    f_1(t,x,y)=&\dot x(t) = y\\
+    f_2(t,x,y) = & \dot y(t) = -Ax\end{align*}\]
+    with \(A\in\mathbb{R}\).
+  </p>
+
+  <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;float:left"></div>
+  <div id="jxgbox2" class="jxgbox" style="width:600px; height:600px;"></div>
+  <br clear="all">
+  <script language="JavaScript">
+    var jxgbox = document.getElementById('jxgbox');
+
+    var s, o;
+    var board, board2, point;
+    var f, fx, fy, ftxt, field = [];
+    var inputfx, inputfy, A;
+    var curveN, curveh, curveC, curveG, curveG1, curveG2,graphFxref;
+    var curveX, curveY;
+    var bFieldT, bFieldS, bTraject, inputtype, seltext, seltype;
+
+    var init = function () {
+      board = JXG.JSXGraph.initBoard('jxgbox', {
+        axis: true,
+        boundingbox: [-2, 2, 2, -2]
+      });
+      board2 = JXG.JSXGraph.initBoard('jxgbox2', {
+        axis: true,
+        boundingbox: [-10, 2, 50, -2]
+      });
+      board.addChild(board2);
+      inputfx = board.create('input', [-1.9, 1.3, 'y', 'f_1(t,x,y)=']);
+      inputfy = board.create('input', [-1.9, 1.1, '-A.Value()*x', 'f_2(t,x,y)=']);
+      inputfxref = board2.create('input', [1, 1.7, 'cos(sqrt(A.Value())*t)', 'f_{1ref}(t)=']);
+
+      bFieldS = board.create(
+        "button",
+        [-1.9, 0.9, "set ode",
+        function () { plot(); },
+        ],
+        { fixed: true }
+      );
+
+      // trajectory
+      point = board.create('point', [1, 0], { name: '(x_0,y_0)', color: 'red' });
+      curveN = board.create('slider', [
+        [0.1, 1.8],
+        [1.1, 1.8],
+        [50, 750, 2000]
+      ], {
+        name: 'N', snapWidth: 50
+      });
+      curveh = board.create('slider', [
+        [0.1, 1.6],
+        [1.1, 1.6],
+        [0.01, 0.05, 0.2]
+      ], {
+        name: 'h', snapWidth: 0.01
+      });
+      A = board.create('slider', [
+        [0.1, 1.3],
+        [1.1, 1.3],
+        [0, 1, 1.5]
+      ], {
+        name: 'A', snapWidth: 0.002
+      });
+      // input 
+      inputtype = board.create('text', [-1.4, 1.8, '<select id="RKtype">' +
+        '<option value="euler" selected> Euler' +
+        '<option value="heun"> Heun' +
+        '<option value="rk4"> Runke-Kutta 4' +
+        '</select>'], { fixed: true });
+      seltext = board.create('text', [-1.9, 1.8, 'RK Method'])
+      seltype = document.querySelector('#RKtype');
+      seltype.addEventListener("change", function () {
+        plot();board.update();
+      })
+
+
+    };
+
+    var plot = function () {
+
+      board.removeObject([curveC, curveX, curveY]);
+      board2.removeObject(graphFxref);
+      fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
+      fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
+      ftxt = '[' + inputfx.Value() + ',' + inputfy.Value() + ']';
+      ftxt = ftxt.replace(/x/g, "x[0]");
+      ftxt = ftxt.replace(/y/g, "x[1]");
+
+      // generatet function used in Numerics.rungeKutta
+      f = board.jc.snippet(ftxt, true, 't,x');
+
+      curveC = board.create('curve', [[], []], { strokeWidth: 3 });
+      curveC.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        var h = curveh.Value();
+        var N = curveN.Value();
+        var method = seltype.value;
+        var data = JXG.Math.Numerics.rungeKutta(method, [point.X(), point.Y()], [0, h * N], N, f);
+        for (var i = 0; i < curveN.Value(); i++) {
+          this.dataX[i] = data[i][0];
+          this.dataY[i] = data[i][1];
+        }
+
+
+      };
+      curveX = board2.create('curve', [[], []], { strokeWidth: 1 });
+      curveX.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        var h = curveh.Value();
+        var N = curveN.Value();
+        var method = seltype.value;
+        var data = JXG.Math.Numerics.rungeKutta(method, [point.X(), point.Y()], [0, h * N], N, f);
+        for (var i = 0; i < curveN.Value(); i++) {
+          this.dataX[i] = i * h;
+          this.dataY[i] = data[i][0];
+          //        this.dataY[i]=data[i][1];
+        }
+      };
+      /*
+      curveY = board2.create('curve', [[], []], { strokeWidth: 1, strokeColor: JXG.palette.red });
+      curveY.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        var h = curveh.Value();
+        var N = curveN.Value();
+        var method = seltype.value;
+        var data = JXG.Math.Numerics.rungeKutta(method, [point.X(), point.Y()], [0, h * N], N, f);
+        for (var i = 0; i < curveN.Value(); i++) {
+          this.dataX[i] = i * h;
+          this.dataY[i] = data[i][1];
+        }
+      };
+      */
+      fxref = board.jc.snippet(inputfxref.Value(), true, 't');
+      graphFxref = board2.create('functiongraph',[fxref,0,()=>{return curveh.Value()*curveN.Value();}],
+        {strokeWidth:3,strokeColor:JXG.palette.green});
+
+
+    }
+
+    init();
+    plot();
+
+
+
+  </script>
+  </p>
+
+</body>
+
+</html>
