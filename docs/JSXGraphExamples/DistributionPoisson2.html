@@ -1,0 +1,111 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8"
+      src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+
+
+   <title>Distribution</title>
+</head>
+
+<body>
+
+   <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+   </div>
+
+
+   <h2>Poisson Distribution</h2>
+   <p>
+   </p>
+
+
+   <p>
+      \(\lambda\in\mathbb{R}^+\) is given.
+      The densitiy funciton is \(P(X = k) = \dfrac{\lambda^k e^{-\lambda}}{k!}\) with \(k\in\mathbb{N}_0\)
+   </p>
+   <center>
+      <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+      <script language="JavaScript">
+         "use strict";
+         JXG.Options.text.useMathJax = true;
+         var probchart;
+         var board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true });
+         var lambda = board.create('slider', [[1, 1.01], [8, 1.01], [0.1, 5, 20]], { name: '\\(\\lambda\\)' });
+
+         var fvals = [], xvals = [];
+
+         for (let i = 0; i < 21; i++) {
+            xvals.push(i);
+            fvals.push(() => poisson(i, lambda.Value()));
+         }
+
+         var poissonpdf = board.create('chart', [xvals, fvals], { chartStyle: 'bar', width: 0.8, colors: ['#3F4C6B'] });
+         var f = board.create('functiongraph', [function (x) {
+            var n, dist = 0;
+
+            for (n = 0; n < 20 + 1; n++) {
+               if (x < n) {
+                  return dist;
+               }
+               dist = dist + poisson(n, lambda.Value());
+            }
+            return dist;
+         }]);
+
+
+         function poisson(k, p) {
+            var coeff = JXG.Math.factorial(k);
+            return Math.pow(p, k) * Math.exp(-p) / coeff;
+         }
+
+         var plotprob = function () {
+            board.removeObject(probchart);
+            var xvalsloc = []; 
+            var fvalsloc = []; 
+            for (let i = p1x.X(); i <= p2x.X(); i++) {
+                   xvalsloc.push(i); 
+                   fvalsloc.push(poisson(i, lambda.Value())); }
+            probchart = board.create('chart', [xvalsloc,fvalsloc],
+            { chartStyle: 'bar', width: 0.8, colors:[JXG.palette.red] });
+         }
+
+         var p1x = board.create('glider', [0, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+         var p2x = board.create('glider', [5, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+         board.updateConditions = function () {
+            p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p1x.X())), 0], board);
+            p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p2x.X())), 0], board);
+            p1x.update();
+            p2x.update();
+
+            if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+               p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X(), 0], board);
+               p2x.update();
+            }
+            plotprob();
+         }
+
+      
+
+
+      </script>
+   </center>
+   </p>
+   <footer>
+      Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+      Based on: <a href="https://jsxgraph.uni-bayreuth.de/wiki/index.php?title=Binomial_distribution">JSXGraph
+         Examples Binomial</a>
+   </footer>
+
+</html>

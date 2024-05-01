@@ -32,6 +32,13 @@ See the list below or look at the [Examples there](https://idiamath.github.io/JS
 - [Poisson Distribution](./JSXGraphExamples/DistributionPoisson.html)
 - [Uniform Distribution](./JSXGraphExamples/DistributionUniform.html)
 
+In the following examples one can highlight probalities $P(a<=X<=b)$.
+- [Binomial Distribution](./JSXGraphExamples/DistributionBinomial2.html)
+- [Exponential Distribution](./JSXGraphExamples/DistributionExponential2.html)
+- [Gamma Distribution](./JSXGraphExamples/DistributionGamma2.html)
+- [Normal Distribution](./JSXGraphExamples/DistributionNormal2.html)
+- [Poisson Distribution](./JSXGraphExamples/DistributionPoisson2.html)
+
 ## Differential Equations
 ### scalar ODEs
 - [LR current](./JSXGraphExamples/ODE-LR.html)
@@ -47,7 +54,6 @@ See the list below or look at the [Examples there](https://idiamath.github.io/JS
 - [Phasenportrait (inhomogenous)](./JSXGraphExamples/Phasenportrait.html)
 - [System of non-autonomous ODE](./JSXGraphExamples/Non-Autonomous-ODESystem.html)
 - [System of non-autonomous ODE (trajectory and time)](./JSXGraphExamples/Non-Autonomous-ODESystem2.html)
-- [System of non-autonomous ODE (Euler, Heun, RK4)](./JSXGraphExamples/ODESystem-Solver.html)
 
 
 ## Interactive Digital Assessement in Mathematics

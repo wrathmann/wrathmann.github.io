@@ -39,7 +39,7 @@
     var board, board2, point;
     var f, fx, fy, ftxt, field = [];
     var inputfx, inputfy, A;
-    var curveN, curveh, curveC, curveG, curveG1, curveG2,graphFxref;
+    var curveN, curveh, curveC, curveG, curveG1, curveG2, graphFxref;
     var curveX, curveY;
     var bFieldT, bFieldS, bTraject, inputtype, seltext, seltype;
 
@@ -97,7 +97,7 @@
       seltext = board.create('text', [-1.9, 1.8, 'RK Method'])
       seltype = document.querySelector('#RKtype');
       seltype.addEventListener("change", function () {
-        plot();board.update();
+        plot(); board.update();
       })
 
 
@@ -161,8 +161,8 @@
       };
       */
       fxref = board.jc.snippet(inputfxref.Value(), true, 't');
-      graphFxref = board2.create('functiongraph',[fxref,0,()=>{return curveh.Value()*curveN.Value();}],
-        {strokeWidth:3,strokeColor:JXG.palette.green});
+      graphFxref = board2.create('functiongraph', [fxref, 0, () => { return curveh.Value() * curveN.Value(); }],
+        { strokeWidth: 3, strokeColor: JXG.palette.green });
 
 
     }

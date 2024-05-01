@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width">
-  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
   </script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
 
@@ -27,7 +28,9 @@
 
   <h2>Uniform distribution</h2>
   <p>
-     The densitiy funciton is \(f(x) =\dfrac{1}{b-a}1_{[a,b]}(x) \)
+    The densitiy function is \(f(x) =\dfrac{1}{b-a}1_{[a,b]}(x) \).
+    The distriubtion function is \(F(x)=\begin{cases}0, & x< a, \\ \frac{x-a}{b-a}, & a\leqslant x < b, \\ 1, &
+      x\geqslant b.</b> \end{cases}\)
   </p>
 
 
@@ -40,23 +43,26 @@
     "use strict";
     JXG.Options.text.useMathJax = true;
     var board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-2, 3, 2, -0.5], axis: true, showCopyright: false });
-    var p1x = board.create('glider', [-1,0,board.defaultAxes.x], {style:1, name:'a'});
-    var p2x = board.create('glider', [1,0,board.defaultAxes.x], {style:1, name:'b'});
-    var p3x = board.create('point', [()=>p1x.X(),()=>(1/(p2x.X()-p1x.X()))], {style:1, name:'a1',visible:false});
-    var p4x = board.create('point', [()=>p2x.X(),()=>(1/(p2x.X()-p1x.X()))], {style:1, name:'b1',visible:false});
+    var p1x = board.create('glider', [-1, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+    var p2x = board.create('glider', [1, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+    var p3x = board.create('point', [() => p1x.X(), () => (1 / (p2x.X() - p1x.X()))], { style: 1, name: 'a1', visible: false });
+    var p4x = board.create('point', [() => p2x.X(), () => (1 / (p2x.X() - p1x.X()))], { style: 1, name: 'b1', visible: false });
+    var p5x = board.create('point', [() => p2x.X(), 1], { style: 1, name: 'b1', visible: false });
 
-    var l1 = board.create('line',[[-10,0],p1x],{strokeWidth:3,straightLast:false});
-    var l2 = board.create('line',[p3x,p4x],{strokeWidth:3,straightFirst:false,straightLast:false});
-    var l3 = board.create('line',[p2x,[10,0]],{strokeWidth:3,straightFirst:false});
-    
-    board.updateConditions = function() {
-	if(p2x.coords.usrCoords[1] <p1x.coords.usrCoords[1]) {
-		p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER,[1,p1x.X()+0.1,0] , board);
-		p2x.update();
-	}
-};
+    var l1 = board.create('line', [[-10, 0], p1x], { strokeWidth: 3, straightLast: false });
+    var l2 = board.create('line', [p3x, p4x], { strokeWidth: 3, straightFirst: false, straightLast: false });
+    var l3 = board.create('line', [p2x, [10, 0]], { strokeWidth: 3, straightFirst: false });
+    var l2v = board.create('line', [p1x, p5x], { strokeWidth: 1, straightFirst: false, straightLast: false });
+    var l3v = board.create('line', [p5x, [10, 1]], { strokeWidth: 1, straightFirst: false });
 
-</script>
+    board.updateConditions = function () {
+      if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+        p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X() + 0.1, 0], board);
+        p2x.update();
+      }
+    };
+
+  </script>
   <footer>
     Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
   </footer>

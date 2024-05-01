@@ -1,0 +1,135 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8"
+      src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+
+
+   <title>Distribution</title>
+</head>
+
+<body>
+
+   <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+   </div>
+
+
+   <h2>Binomial distribution</h2>
+   <p>
+      \(p\in[0,1]\) and \(n\in\mathbb{N}\) are given.
+      The densitiy funciton is \(P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}\) with \(k\in\{0,\dots n\}\)
+   </p>
+
+
+   <p>
+      <center>
+         <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+      </center>
+   </p>
+   <script language="JavaScript">
+      JXG.Options.text.useMathJax = true;
+      var probchart;
+      board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true, showCopyright: false });
+      var prob = board.create('slider', [[1, 1], [4, 1], [0, .5, 1]], { name: 'p', snapWidth: 0.05 });
+      var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, 20]], { name: 'n', snapWidth: 1 });
+      //N.on('up',(e)=>plot());
+      N.on('drag', (e) => plot());
+      var fvals = [], xvals = [];
+      var binomialpdf, f;
+
+      function plot() {
+         var Nloc = N.Value();
+         board.removeObject([binomialpdf, f]);
+         fvals = [], xvals = [];
+         for (let i = 0; i < Nloc + 1; i++) {
+            xvals.push(i);
+            fvals.push((function (_il) { return (() => { return binomial(Nloc, _il, prob.Value()) }) })(i));
+         }
+         binomialpdf = board.create('chart', [xvals, fvals], { chartStyle: 'bar', width: 0.8, colors: ['#3F4C6B'] });
+         f = board.create('functiongraph', [function (x) {
+            var dist = 0;
+
+            for (let n = 0; n < Nloc + 1; n++) {
+               if (x < n) {
+                  return dist;
+               }
+               dist = dist + binomial(Nloc, n, prob.Value());
+            }
+            return dist;
+         }]);
+
+      }
+
+      var plotprob = function () {
+         board.removeObject(probchart);
+         var xvalsloc = [];
+         var fvalsloc = [];
+         for (let i = p1x.X(); i <= p2x.X(); i++) {
+            xvalsloc.push(i);
+            fvalsloc.push(binomial(N.Value(), i, prob.Value()));
+         }
+         probchart = board.create('chart', [xvalsloc, fvalsloc],
+            { chartStyle: 'bar', width: 0.8, colors: [JXG.palette.red] });
+      }
+
+      var p1x = board.create('glider', [0, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+      var p2x = board.create('glider', [5, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+      board.updateConditions = function () {
+         p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p1x.X())), 0], board);
+         p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p2x.X())), 0], board);
+         p1x.update();
+         p2x.update();
+
+         if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+            p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X(), 0], board);
+            p2x.update();
+         }
+         plotprob();
+      }
+
+
+
+
+
+      function binomial(n, k, p) {
+
+         var coeff = 1;
+         for (var x = n - k + 1; x < n + 1; x++) {
+            coeff *= x;
+         }
+         for (x = 1; x < k + 1; x++) {
+            coeff /= x;
+         }
+         var p1 = 1;
+         var p2 = 1;
+         for (x = 0; x < k; x++) {
+            p1 = p1 * p;
+         }
+         for (x = 0; x < n - k; x++) {
+            p2 = p2 * (1 - p);
+         }
+         return coeff * p1 * p2;
+      }
+
+      plot();
+   </script>
+   <footer>
+      Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+      Based on: Alfred Wassermann, UBT, <a
+         href="https://jsxgraph.uni-bayreuth.de/wiki/index.php?title=Binomial_distribution">JSXGraph Examples
+         Binomial</a>
+   </footer>
+
+</html>

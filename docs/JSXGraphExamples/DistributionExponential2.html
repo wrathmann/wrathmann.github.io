@@ -1,0 +1,102 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+
+  <title>Distribution</title>
+</head>
+
+<body>
+
+  <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+  </div>
+
+
+  <h2>Exponential Distribution</h2>
+  <p> The distribution \(\mathrm{Exp}(\lambda)\) for \(\lambda > 0\) given by the distribution function
+    \(f(x) = \lambda e^{-\lambda x}\) for \(x \geqslant 0\).
+  </p>
+
+
+  <p>
+    <center>
+      <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+      <script language="JavaScript">
+        JXG.Options.text.useMathJax = true;
+        var nSubDivCurv = 50;
+        board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 6, 6, -1], axis: true, showCopyright: false });
+        var lambda = board.create('slider', [[1, 5.5], [4, 5.5], [0.1, 1, 10]], { name: '\\(\\lambda\\)', snapWidth: 0.1 });
+
+        var pdffun = function (x) {
+
+          if (x < 0) {
+            return 0;
+          }
+          dist = lambda.Value() * Math.exp(-lambda.Value() * x);
+          return dist;
+        }
+        var pdf = board.create('functiongraph', [pdffun], { strokeWidth: 2 });
+
+
+        var f = board.create('functiongraph', [function (x) {
+          if (x < 0) {
+            return 0;
+          }
+          return 1 - Math.exp(-lambda.Value() * x);
+        }]);
+
+        var p1x = board.create('glider', [0.1, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+        var p2x = board.create('glider', [1, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+        board.updateConditions = function () {
+          if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+            p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X() + 0.1, 0], board);
+            p2x.update();
+          }
+        }
+
+        var ProbArea = board.create('curve', [[], []], { strokeWidth: 1, fillColor: JXG.palette.red, fillOpacity: 0.5 });
+        ProbArea.updateDataArray = function () {
+          // generate upper curve
+          var xl = p1x.X();
+          var hx = (p2x.X() - p1x.X()) / (nSubDivCurv);
+          var pt = p1x.X();
+          this.dataX = [xl];
+          this.dataY = [0];
+          this.dataX.push(xl);
+          this.dataY.push(pdffun(xl));
+          for (i = 1; i <= nSubDivCurv; i++) {
+            pt += hx;
+            this.dataX.push(pt);
+            this.dataY.push(pdffun(pt));
+          }
+          // add now the part on x
+          this.dataX.push(p2x.X());
+          this.dataY.push(0);
+          this.dataX.push(p1x.X());
+          this.dataY.push(0);
+
+        }
+
+
+      </script>
+    </center>
+  </p>
+  <footer>
+    Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+  </footer>
+
+</html>

@@ -1,0 +1,190 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8"
+      src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+
+
+   <title>Distribution</title>
+</head>
+
+<body>
+
+   <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+   </div>
+
+
+   <h2>Gamma Distribution</h2>
+   <p>
+   </p>
+
+
+   <p>
+      <center>
+         <!-- Gamma Function from https://www.math.ucla.edu/~tom/distributions/gamma.html?, Thomas S. Ferguson-->
+         The density of the Gamma distribution is defined by
+         \[\gamma_{\alpha,\beta}(x) = \frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{\beta x}.\]
+         <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+         <script language="JavaScript">
+            //"use strict";
+            JXG.Options.text.useMathJax = true;
+            var nSubDivCurv = 50;
+
+            board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-0.5, 3, 5.5, -1], axis: true, showCopyright: false });
+            var alpha = board.create('slider', [[0.5, 2.5], [2, 2.5], [0.1, 1, 2]], { name: '\\(\\alpha\\)', snapWidth: 0.1 });
+            var beta = board.create('slider', [[0.5, 2.0], [2, 2.0], [0.1, 2, 3]], { name: '\\(\\beta\\)', snapWidth: 0.1 });
+
+            var npdf = function (x) {
+               dist = Math.exp(-Math.pow((x - alpha.Value()) / beta.Value(), 2) / 2) / Math.sqrt(2 * Math.PI) / beta.Value();
+               return dist;
+            }
+
+
+            /* in terms of https://www.math.ucla.edu/~tom/distributions/gamma.html, I have to use 1/beta! */
+            var gammacdf = function (x) { return Gammacdf(x * beta.Value(), alpha.Value()); }
+            var gammapdfh = JXG.Math.Numerics.D(gammacdf);
+            var gammapdf = function (x) { return gammapdfh(x); }
+
+            var pdf = board.create('functiongraph', [gammapdf], { strokeWidth: 2 });
+
+            var f = board.create('functiongraph', [gammacdf], { strokeWidth: 3 });
+            var p1x = board.create('glider', [0.1, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+            var p2x = board.create('glider', [1, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+            board.updateConditions = function () {
+               if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+                  p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X() + 0.1, 0], board);
+                  p2x.update();
+               }
+            }
+
+            var ProbArea = board.create('curve', [[], []], { strokeWidth: 1, fillColor: JXG.palette.red, fillOpacity: 0.5 });
+            ProbArea.updateDataArray = function () {
+               // generate upper curve
+               var xl = p1x.X();
+               var hx = (p2x.X() - p1x.X()) / (nSubDivCurv);
+               var pt = p1x.X();
+               this.dataX = [xl];
+               this.dataY = [0];
+               this.dataX.push(xl);
+               this.dataY.push(gammapdf(xl));
+               for (i = 1; i <= nSubDivCurv; i++) {
+                  pt += hx;
+                  this.dataX.push(pt);
+                  this.dataY.push(gammapdf(pt));
+               }
+               // add now the part on x
+               this.dataX.push(p2x.X());
+               this.dataY.push(0);
+               this.dataX.push(p1x.X());
+               this.dataY.push(0);
+
+            }
+
+
+
+            <!--   Taken from www.math.ucla.edu/~tom/distributions/gamma.html, Thomas Ferguson, UCLA  -->
+
+            function LogGamma(Z) {
+               with (Math) {
+                  var S = 1 + 76.18009173 / Z - 86.50532033 / (Z + 1) + 24.01409822 / (Z + 2) - 1.231739516 / (Z + 3) + .00120858003 / (Z + 4) - .00000536382 / (Z + 5);
+                  var LG = (Z - .5) * log(Z + 4.5) - (Z + 4.5) + log(S * 2.50662827465);
+               }
+               return LG
+            }
+
+
+            function Gcf(X, A) {        // Good for X>A+1
+               with (Math) {
+                  var A0 = 0;
+                  var B0 = 1;
+                  var A1 = 1;
+                  var B1 = X;
+                  var AOLD = 0;
+                  var N = 0;
+                  while (abs((A1 - AOLD) / A1) > .00001) {
+                     AOLD = A1;
+                     N = N + 1;
+                     A0 = A1 + (N - A) * A0;
+                     B0 = B1 + (N - A) * B0;
+                     A1 = X * A0 + N * A1;
+                     B1 = X * B0 + N * B1;
+                     A0 = A0 / B1;
+                     B0 = B0 / B1;
+                     A1 = A1 / B1;
+                     B1 = 1;
+                  }
+                  var Prob = exp(A * log(X) - X - LogGamma(A)) * A1;
+               }
+               return 1 - Prob
+            }
+
+            function Gser(X, A) {        // Good for X<A+1.
+               with (Math) {
+                  var T9 = 1 / A;
+                  var G = T9;
+                  var I = 1;
+                  while (T9 > G * .00001) {
+                     T9 = T9 * X / (A + I);
+                     G = G + T9;
+                     I = I + 1;
+                  }
+                  G = G * exp(A * log(X) - X - LogGamma(A));
+               }
+               return G
+            }
+
+            function normalcdf(X) {   //HASTINGS.  MAX ERROR = .000001
+               var T = 1 / (1 + .2316419 * Math.abs(X));
+               var D = .3989423 * Math.exp(-X * X / 2);
+               var Prob = D * T * (.3193815 + T * (-.3565638 + T * (1.781478 + T * (-1.821256 + T * 1.330274))));
+               if (X > 0) {
+                  Prob = 1 - Prob
+               }
+               return Prob
+            }
+
+            function Gammacdf(x, a) {
+               var GI;
+               if (x <= 0) {
+                  GI = 0
+               } else if (a > 200) {
+                  z = (x - a) / Math.sqrt(a)
+                  y = normalcdf(z)
+                  b1 = 2 / Math.sqrt(a)
+                  phiz = .39894228 * Math.exp(-z * z / 2)
+                  w = y - b1 * (z * z - 1) * phiz / 6  //Edgeworth1
+                  b2 = 6 / a
+                  u = 3 * b2 * (z * z - 3) + b1 * b1 * (z ^ 4 - 10 * z * z + 15)
+                  GI = w - phiz * z * u / 72        //Edgeworth2
+               } else if (x < a + 1) {
+                  GI = Gser(x, a)
+               } else {
+                  GI = Gcf(x, a)
+               }
+               return GI;
+            }
+            // end   Taken from www.math.ucla.edu/~tom/distributions/gamma.html, Thomas Ferguson, UCLA 
+
+
+         </script>
+      </center>
+   </p>
+   <footer>
+      Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+      Based on the implementation of the Gamma distribution and Gamma function of Thomas S. Ferguson <a
+         href="https://www.math.ucla.edu/~tom/distributions/gamma.html">Gamma distriubtion calculator</a>
+   </footer>
+
+</html>
