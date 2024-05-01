@@ -2,8 +2,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <script type="text/javascript" charset="UTF-8"
-    src="https://jsxgraph.org/distrib/jsxgraphcore.js">
+    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
     </script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
   
@@ -37,6 +36,7 @@
       \[\gamma_{\alpha,\beta}(x) = \frac{\beta^{\alpha}}{\Gamma(\alpha)} x^{\alpha-1}e^{\beta x}.\]
       <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
       <script language="JavaScript">
+      //"use strict";
         JXG.Options.text.useMathJax = true;
         board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-0.5, 3, 5.5, -1], axis: true, showCopyright: false });
         var alpha = board.create('slider', [[0.5, 2.5], [2, 2.5], [0.1, 1, 2]], { name: '\\(\\alpha\\)', snapWidth: 0.1 });
@@ -65,14 +65,7 @@
           with (Math) {
             var S = 1 + 76.18009173 / Z - 86.50532033 / (Z + 1) + 24.01409822 / (Z + 2) - 1.231739516 / (Z + 3) + .00120858003 / (Z + 4) - .00000536382 / (Z + 5);
             var LG = (Z - .5) * log(Z + 4.5) - (Z + 4.5) + log(S * 2.50662827465);
-          }A few days ago I found your implementation of the Gamma distribution at 
-https://www.math.ucla.edu/~tom/distributions/gamma.html
-
-I am building some interactive graphs for distribution functions (wrathmann.github.io) and would like to add the Gamma distribution.
-
-In the attached html document you will find my solution for the slightly modified pdf beta turns to 1/beta.
-
-I will ask you to agree to publish this document on Github, with your implementation of the Gamma function on wrathmann.github.io, so that it can be reused by others.
+          }
           return LG
         }
 
@@ -145,9 +138,9 @@ I will ask you to agree to publish this document on Github, with your implementa
           } else {
             GI = Gcf(x, a)
           }
-          return GI
+          return GI;
         }
-        <!-- end   Taken from www.math.ucla.edu/~tom/distributions/gamma.html, Thomas Ferguson, UCLA  -->
+        // end   Taken from www.math.ucla.edu/~tom/distributions/gamma.html, Thomas Ferguson, UCLA 
 
 
       </script>

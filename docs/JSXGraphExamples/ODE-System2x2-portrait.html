@@ -1,0 +1,149 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+
+   <title>Systeme</title>
+</head>
+
+<body>
+
+   <h1>Differenzialgleichungssysteme (Stabilit&auml;tsuntersuchungen)</h1>
+   <p>
+      Lösung des (autonomen) Differenzialgleichungssystems
+      \(f(t,\mathbf{y})=\begin{pmatrix}a_{11}&a_{12}\\a_{21}&a_{22}\end{pmatrix}\mathbf{y}\).
+   </p>
+   <p> <u>Startkonfiguration:</u>
+      <b>Ged&auml;pfter linearer Oszillator</b> zur Beschreibung von Schwingkreisen und Einmassenschwingern.
+      <br>
+
+   </p>
+   <h2> Handhabung</h2>
+   <h3>Matrixeintr&auml;ge</h3>
+   <p>
+      &Uuml;ber die Schieberegler \(a_{11}, a_{12}, a_{21}\) und \(a_{22}\) k&ouml;nnen die Matrixeintr&auml;ge in \(A\)
+      ver&auml;ndert werden.
+      Werte zwischen [-1,1] sind m&ouml;glich. Somit k&ouml;nnen die Eigenwerte \(A\) der Matrix ver&auml;ndert
+      werden und das zugeh&ouml;rige L&ouml;sungsverhalten kann studiert werden.
+   </p>
+
+
+   <h3>Startwert</h3>
+   <ul>
+      <li>1. Die <font color=blue>blaue</font> Trajektrorie geh&ouml;rt
+      zum variierenden Startpunkt \((y_1^0,y_2^0)\).
+         <li>2. Die <font color=red>rote</font> Trajektrorie ist die 
+         Vergleichstrajektorie und kann durch Klicken auf <b>Setze 
+         Referenzl&ouml;sung</b> gesetzt werden.
+      
+      
+      </ul>
+   <p>
+      <form>
+         <input type=button value="Setze Referenzl&ouml;sung" onclick="doIt()">
+         </form>
+   </p>
+   </span>
+   <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;"></div>
+   <script language="JavaScript">
+      "use strict";
+      JXG.Options.text.useMathJax = true;
+      var board = JXG.JSXGraph.initBoard('jxgbox', { boundingbox: [-10, 10, 10, -10], axis: true, grid: true });
+      var a11 = board.create('slider', [[-8.0, 9.0], [-3.0, 9.0], [-1.0, 0.0, 1.0]], { name: '\\(\ a_{11}\\)', strokeColor: 'black', fillColor: 'black' });
+      var a12 = board.create('slider', [[1.0, 9.0], [6.0, 9.0], [-1.0, 1.0, 1.0]], { name: '\\(\ a_{12}\\)', strokeColor: 'black', fillColor: 'black' });
+      var a21 = board.create('slider', [[-8.0, 7.0], [-3.0, 7.0], [-1.0, -1.0, 1.0]], { name: '\\(\ a_{21}\\)', strokeColor: 'black', fillColor: 'black' });
+      var a22 = board.create('slider', [[1.0, 7.0], [6.0, 7.0], [-1, -0.1, 1]], { name: '\\(\ a_{22}\\)', strokeColor: 'black', fillColor: 'black' });
+     
+      var P = board.create('point',[5,5], {name:'\\((y_1^0,y_2^0)\\)'});
+
+
+
+      var g3 = null;
+
+      function ode() {
+         var I = [0, 30];
+         var N = 1000;
+
+         var f = function (t, x) {
+            var y = [];
+            y[0] = a11.Value() * x[0] + a12.Value() * x[1];
+            y[1] = a21.Value() * x[0] + a22.Value() * x[1];
+            return y;
+         }
+
+         var x0 = [P.X(), P.Y()];
+
+         var data = JXG.Math.Numerics.rungeKutta('heun', x0, I, N, f);
+
+         var t = [];
+         var q = I[0];
+         var h = (I[1] - I[0]) / N;
+         for (var i = 0; i < data.length; i++) {
+            data[i].push(q);
+            q += h;
+         }
+
+         return data;
+      }
+
+
+      var data = ode();
+      var t = [];
+      var dataprey = [];
+      var datapred = [];
+      for (var i = 0; i < data.length; i++) {
+         t[i] = data[i][2];
+         datapred[i] = data[i][0];
+         dataprey[i] = data[i][1];
+      }
+
+      var g3 = board.create('curve', [datapred, dataprey], { strokeColor: 'red', strokeWidth: '2px' });
+      g3.updateDataArray = function () {
+         this.dataX = [];
+         this.dataY = [];
+         for (var i = 0; i < data.length; i++) {
+            this.dataX[i] = datapred[i];
+            this.dataY[i] = dataprey[i];
+         }
+      }
+
+      var g5 = board.create('curve', [datapred, dataprey], { strokeColor: 'blue', strokeWidth: '2px' });
+      g5.updateDataArray = function () {
+         var data = ode();
+         this.dataX = [];
+         this.dataY = [];
+         for (var i = 0; i < data.length; i++) {
+            this.dataX[i] = data[i][0];
+            this.dataY[i] = data[i][1];
+         }
+      }
+
+      function doIt() {
+         var data = ode();
+         dataprey = [];
+         datapred = [];
+         for (var i = 0; i < data.length; i++) {
+            datapred[i] = data[i][0];
+            dataprey[i] = data[i][1];
+         }
+         board.update();
+      }
+
+   </script>
+</body>
+
+<footer>Wigand Rathmann, FAU</a></footer>
+
+</html>

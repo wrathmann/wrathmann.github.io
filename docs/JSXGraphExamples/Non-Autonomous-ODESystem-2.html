@@ -1,0 +1,158 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8"
+      src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+   <title>Non-autonomous system</title>
+</head>
+
+<body>
+
+   <h1>Non-autonomous system</h1>
+   <p>
+   This example demonstrates the behaviour of a non-autonomous system of ODEs
+   \[\begin{align*}
+   f_1(t,x,y)=&\dot x(t) = y\\
+   f_2(t,x,y) = & \dot y(t) = x-x^3-\frac14 y-A\sin(t)\end{align*}\]
+   with \(A\in\mathbb{R}\).
+</p>
+
+   <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;float:left"></div>
+   <div id="jxgbox2" class="jxgbox" style="width:600px; height:600px;"></div>
+   <br clear="all">
+   <script language="JavaScript">
+      var jxgbox = document.getElementById('jxgbox');
+
+      var s, o;
+      var board, board2, point;
+      var f, fx, fy, ftxt, field = [];
+      var inputfx, inputfy, A;
+      var curveN, curveh, curveC, curveG, curveG1, curveG2;
+      var curveX, curveY;
+      var bFieldT, bFieldS, bTraject;
+
+      var init = function () {
+         board = JXG.JSXGraph.initBoard('jxgbox', {
+            axis: true,
+            boundingbox: [-2, 2, 2, -2]
+         });
+         board2 = JXG.JSXGraph.initBoard('jxgbox2', {
+            axis: true,
+            boundingbox: [-10, 2, 150, -2]
+         });
+         board.addChild(board2);
+         inputfx = board.create('input', [-1.9, 1.8, 'y', 'f_1(t,x,y)=']);
+         inputfy = board.create('input', [-1.9, 1.6, 'x-x^3-y/4-A.Value()*sin(t)', 'f_2(t,x,y)=']);
+
+         bFieldS = board.create(
+            "button",
+            [-1.9, 1.3, "set ode",
+            function () { plot(); },
+            ],
+            { fixed: true }
+         );
+
+         // trajectory
+         point = board.create('point', [0.9, 0.4], { name: '(x_0,y_0)', color: 'red' });
+         curveN = board.create('slider', [
+            [0.1, 1.8],
+            [1.1, 1.8],
+            [50, 500, 1000]
+         ], {
+            name: 'N', snapWidth: 50
+         });
+         curveh = board.create('slider', [
+            [0.1, 1.6],
+            [1.1, 1.6],
+            [0.05, 0.05, 0.2]
+         ], {
+            name: 'h', snapWidth: 0.05
+         });
+         A = board.create('slider', [
+            [0.1, 1.3],
+            [1.1, 1.3],
+            [0.2, 0.2645, 0.3]
+         ], {
+            name: 'A', snapWidth: 0.002
+         });
+      };
+
+      var plot = function () {
+
+         board.removeObject([curveC, curveX, curveY]);
+         fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
+         fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
+         ftxt = '[' + inputfx.Value() + ',' + inputfy.Value() + ']';
+         ftxt = ftxt.replace(/x/g, "x[0]");
+         ftxt = ftxt.replace(/y/g, "x[1]");
+
+         // generatet function used in Numerics.rungeKutta
+         f = board.jc.snippet(ftxt, true, 't,x');
+
+         curveC = board.create('curve', [[], []], { strokeWidth: 3 });
+         curveC.updateDataArray = function () {
+            this.dataX = [];
+            this.dataY = [];
+            var h = curveh.Value();
+            var N = curveN.Value();
+            var data = JXG.Math.Numerics.rungeKutta('rk4', [point.X(), point.Y()], [0, h * N], N, f);
+            for (var i = 0; i < curveN.Value(); i++) {
+               this.dataX[i] = data[i][0];
+               this.dataY[i] = data[i][1];
+            }
+
+
+         };
+         curveX = board2.create('curve', [[], []], { strokeWidth: 3 });
+         curveX.updateDataArray = function () {
+            this.dataX = [];
+            this.dataY = [];
+            var h = curveh.Value();
+            var N = curveN.Value();
+            var data = JXG.Math.Numerics.rungeKutta('rk4', [point.X(), point.Y()], [0, h * N], N, f);
+            for (var i = 0; i < curveN.Value(); i++) {
+               this.dataX[i] = i * h;
+               this.dataY[i] = data[i][0];
+               //        this.dataY[i]=data[i][1];
+            }
+         };
+         curveY = board2.create('curve', [[], []], { strokeWidth: 3,strokeColor: JXG.palette.red });
+         curveY.updateDataArray = function () {
+            this.dataX = [];
+            this.dataY = [];
+            var h = curveh.Value();
+            var N = curveN.Value();
+            var data = JXG.Math.Numerics.rungeKutta('rk4', [point.X(), point.Y()], [0, h * N], N, f);
+            for (var i = 0; i < curveN.Value(); i++) {
+               this.dataX[i] = i * h;
+               this.dataY[i] = data[i][1];
+            }
+         };
+
+
+      }
+
+      init();
+      plot();
+
+
+
+   </script>
+   Example taken from Voit (2017)
+   </p>
+
+</body>
+
+</html>

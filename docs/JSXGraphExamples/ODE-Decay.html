@@ -1,0 +1,115 @@
+<html>
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width">
+   <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+   </script>
+   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+   </script>
+   <style>
+      body {
+         font-family: sans-serif;
+      }
+   </style>
+
+   <title>Systeme</title>
+</head>
+
+<body>
+
+   <h1>Lineare Differenzialgleichung</h1>
+   <p>
+      Lösung der Differentialgleichung
+      \(\frac{d}{dt}y(t) = \alpha y(t),\ y(0)=y_0\).
+</p>  
+
+   </p>
+   <h2> Handhabung</h2>
+   <h3>Parameter</h3>
+   <p>
+      Über den Schieberegler kann \(\alpha\) verändert werden.   
+   </p>
+<p>
+   <form>
+      <input type=button value="Setze Referenzl&ouml;sung" onclick="doIt()">
+      </form>
+</p>
+
+   
+   </span>
+   <div id="jxgbox" class="jxgbox" style="width:800px; height:400px;"></div>
+   <script language="JavaScript">
+      JXG.Options.text.useMathJax = true;
+      var board = JXG.JSXGraph.initBoard('jxgbox', { boundingbox:[-1,15,25,-1], axis: true, grid: true });
+      var a11 = board.create('slider', [[1.0, 13.0], [6.0, 13.0], [-2, -0.1, 2.0]], { name: '\\(\\alpha\\)', strokeColor: 'black', fillColor: 'black' });
+      
+      var startpred = board.create('glider', [0, 5, board.defaultAxes.y], { name: '\\(y_0\\)', strokeColor: 'red', fillColor: 'red' });
+
+      
+      var g3 = null;
+
+      function ode() {
+         var I = [0, 30];
+         var N = 1000;
+
+         var f = function (t, x) {
+            var y = [];
+            y[0] = a11.Value()*x[0] ;
+            return y;
+         }
+
+         var x0 = [startpred.Y()];
+
+         var data = JXG.Math.Numerics.rungeKutta('heun', x0, I, N, f);
+
+         var t = [];
+         var q = I[0];
+         var h = (I[1] - I[0]) / N;
+         for (var i = 0; i < data.length; i++) {
+            data[i].push(q);
+            q += h;
+         }
+
+         return data;
+      }
+
+
+      var data = ode();
+      var t = [];
+      var dataprey = [];
+      var datapred = [];
+      for (var i = 0; i < data.length; i++) {
+         t[i] = data[i][1];
+         datapred[i] = data[i][0];
+      }
+
+
+      g3 = board.create('curve', [t, datapred], { strokeColor: 'red', strokeWidth: '2px' });
+
+      g4 = board.create('curve', [t, datapred], { strokeColor: 'blue', strokeWidth: '2px' });
+      g4.updateDataArray = function () {
+         var data = ode();
+         this.dataX = [];
+         this.dataY = [];
+         for (var i = 0; i < data.length; i++) {
+            this.dataX[i] = t[i];
+            this.dataY[i] = data[i][0];
+         }
+      }
+      function doIt() {
+	    var data = ode();
+            dataprey = [];
+            for(var i=0; i<data.length; i++) {
+                datapred[i] = data[i][0];
+            }
+      board.update();
+    }
+   </script>
+</body>
+
+<footer>Wigand Rathmann, FAU</a></footer>
+
+</html>
