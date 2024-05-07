@@ -40,7 +40,7 @@
    </p>
    <script language="JavaScript">
       JXG.Options.text.useMathJax = true;
-      var probchart;
+      var probchart, pText;
       board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true, showCopyright: false });
       var prob = board.create('slider', [[1, 1], [4, 1], [0, .5, 1]], { name: 'p', snapWidth: 0.05 });
       var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, 20]], { name: 'n', snapWidth: 1 });
@@ -73,15 +73,20 @@
       }
 
       var plotprob = function () {
-         board.removeObject(probchart);
+         board.removeObject([probchart,pText]);
          var xvalsloc = [];
          var fvalsloc = [];
+         var probval = 0;
          for (let i = p1x.X(); i <= p2x.X(); i++) {
             xvalsloc.push(i);
             fvalsloc.push(binomial(N.Value(), i, prob.Value()));
+            probval += binomial(N.Value(), i, prob.Value());
          }
          probchart = board.create('chart', [xvalsloc, fvalsloc],
             { chartStyle: 'bar', width: 0.8, colors: [JXG.palette.red] });
+         pText = board.create('text',
+            [12,0.95,'\\(P(a\\leqslant X \\leqslant b)='+probval.toFixed(2)+'\\)']);
+
       }
 
       var p1x = board.create('glider', [0, 0, board.defaultAxes.x], { style: 1, name: 'a' });
