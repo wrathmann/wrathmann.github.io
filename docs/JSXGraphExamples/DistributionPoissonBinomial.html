@@ -1,0 +1,156 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+
+  <title>Distribution</title>
+</head>
+
+<body>
+
+  <div style="float: right;"><img alt="" src="FAU_DMM_Logo_rgb_170.png"><br>
+  </div>
+
+
+  <h2>Comparison Biomial and Poisson Distribution</h2>
+  <p>
+  </p>
+
+
+  <h3>Poission Distribution</h3>
+  <p>
+    \(\lambda\in\mathbb{R}^+\) is given.
+    The densitiy function is \(P(X = k) = \dfrac{\lambda^k e^{-\lambda}}{k!}\) with \(k\in\mathbb{N}_0\)
+  </p>
+  <h3>Binomial Distribution</h3>
+  <p>
+    \(p\in[0,1]\) and \(n\in\mathbb{N}\) are given.
+    The densitiy function is \(P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}\) with \(k\in\{0,\dots n\}\)
+ </p>
+  <center>
+    <div id="box2" class="jxgbox" style="width:500px; height:500px; "></div>
+    <script language="JavaScript">
+      "use strict";
+      JXG.Options.text.useMathJax = true;
+      var probpchart, pText,probbchart, bText,fpvals=[], fbvals=[],xpvals=[], xbvals=[],binomialpdf;
+      var board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true });
+      var prob = board.create('slider', [[1, 0.9], [6, 0.9], [0, .1, .4]], { name: 'p', snapWidth: 0.01 });
+      var N = board.create('slider', [[1, 0.85], [6, 0.85], [10, 10, 60]], { name: 'n', snapWidth: 1 });
+      var lambda = board.create('slider', [[1, 0.95], [6, 0.95], [0.1,prob.Value()*N.Value(), 20]], { name: '\\(\\lambda\\)' });
+      N.on('drag', (e) => {plotbiniomial();lambda.setValue(prob.Value()*N.Value());});
+      prob.on('drag', (e) => {lambda.setValue(prob.Value()*N.Value());});
+      var fvals = [], xvals = [];
+      var textPois = board.create('text',[12,1,'Poisson distribution'],{strokeColor:'#3FAF6B',fontSize:16,cssStyle:'font-weight:bold;'});
+      var textBinom = board.create('text',[12,0.85,'Binomial distribution'],{strokeColor:'#3F4F6B',fontSize:16,cssStyle:'font-weight:bold;'});
+      // plot Poisson distribution
+      for (let i = 0; i < 21; i++) {
+        var Nloc = N.Value();
+        xpvals.push(i-0.2);
+        fpvals.push(() => poisson(i, lambda.Value()));
+      }
+
+      var poissonpdf = board.create('chart', [xpvals, fpvals], { chartStyle: 'bar', width: 0.4, colors: ['#3FAF6B'] });
+
+      // plot Binomial distribution
+      plotbiniomial();
+
+      function plotbiniomial() {
+         var Nloc = N.Value();
+         board.removeObject([binomialpdf]);
+         fbvals = [], xbvals = [];
+         for (let i = 0; i < Nloc + 1; i++) {
+          xbvals.push(i+0.2);
+          fbvals.push((function (_il) { return (() => { return binomial(Nloc, _il, prob.Value()) }) })(i));
+         }
+         binomialpdf = board.create('chart', [xbvals, fbvals], { chartStyle: 'bar', width: 0.4, colors: ['#3F4C6B'] });
+      }
+
+      function binomial(n, k, p) {
+
+        var coeff = 1;
+        for (var x = n - k + 1; x < n + 1; x++) {
+          coeff *= x;
+        }
+        for (x = 1; x < k + 1; x++) {
+          coeff /= x;
+        }
+        var p1 = 1;
+        var p2 = 1;
+        for (x = 0; x < k; x++) {
+          p1 = p1 * p;
+        }
+        for (x = 0; x < n - k; x++) {
+          p2 = p2 * (1 - p);
+        }
+        return coeff * p1 * p2;
+      }
+
+      function poisson(k, p) {
+        var coeff = JXG.Math.factorial(k);
+        return Math.pow(p, k) * Math.exp(-p) / coeff;
+      }
+
+      var plotprob = function () {
+        board.removeObject([probpchart, pText,probbchart, bText,]);
+        var xvalsloc = [];
+        var fvalsloc = [];
+        var probval = 0;
+        var xbvalsloc = [];
+        var fbvalsloc = [];
+        var probbval = 0;
+        for (let i = p1x.X(); i <= p2x.X(); i++) {
+          xvalsloc.push(i-0.1);
+          fvalsloc.push(poisson(i, lambda.Value()));
+          probval += poisson(i, lambda.Value());
+          xbvalsloc.push(i+0.1);
+          fbvalsloc.push(binomial(N.Value(), i, prob.Value()));
+          probbval += binomial(N.Value(), i, prob.Value());
+        }
+        probpchart = board.create('chart', [xvalsloc, fvalsloc],{ chartStyle: 'bar', width: 0.2, colors: [JXG.palette.red] });
+        probbchart = board.create('chart', [xbvalsloc, fbvalsloc],{ chartStyle: 'bar', width: 0.2, colors: [JXG.palette.blue] });
+
+          pText = board.create('text', [12, 0.95, '\\(P(a\\leqslant X \\leqslant b)=' + probval.toFixed(2) + '\\)']);
+          bText = board.create('text', [12, 0.8, '\\(P(a\\leqslant X \\leqslant b)=' + probbval.toFixed(2) + '\\)']);
+
+      }
+
+      var p1x = board.create('glider', [10, 0, board.defaultAxes.x], { style: 1, name: 'a' });
+      var p2x = board.create('glider', [12, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+      board.updateConditions = function () {
+        p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p1x.X())), 0], board);
+        p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p2x.X())), 0], board);
+        p1x.update();
+        p2x.update();
+
+        if (p2x.coords.usrCoords[1] < p1x.coords.usrCoords[1]) {
+          p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, p1x.X(), 0], board);
+          p2x.update();
+        }
+        plotprob();
+      }
+
+
+
+
+    </script>
+  </center>
+  </p>
+  <footer>
+    Wigand Rathmann, FAU, <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a><br />
+  </footer>
+
+</html>

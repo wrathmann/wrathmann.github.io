@@ -38,6 +38,7 @@ In the following examples one can highlight probalities $P(a<=X<=b)$.
 - [Gamma Distribution](./JSXGraphExamples/DistributionGamma2.html)
 - [Normal Distribution](./JSXGraphExamples/DistributionNormal2.html)
 - [Poisson Distribution](./JSXGraphExamples/DistributionPoisson2.html)
+- [Comparison Poission and Binomial Distribution](./JSXGraphExamples/DistributionPoissonBinomial.html)
 
 ## Differential Equations
 ### scalar ODEs
