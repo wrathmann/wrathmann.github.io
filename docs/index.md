@@ -23,7 +23,7 @@ See the list below or look at the [Examples there](https://idiamath.github.io/JS
 
 
 
-## Probablity Distributions
+## Probability Distributions
 
 - [Binomial Distribution](./JSXGraphExamples/DistributionBinomial.html)
 - [Exponential Distribution](./JSXGraphExamples/DistributionExponential.html)

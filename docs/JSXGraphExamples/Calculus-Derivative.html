@@ -1,137 +1,114 @@
 <html>
+
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
 
-<!--Set these Flags to true to enable the Modules-->
-	<script type="text/javascript">
-		useJsxGraph = true;
-		useMathJax = true;
-		useSageCell = false;
-
-		if(useSageCell==true){
-			//MathJax is included in SageCell
-			useMathJax = false;
-		};
-	</script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
 
 
-<!--Location of the Server-Script in the Illias-System-->
-<script type="text/javascript" src="https://wrathmann.github.io/JSXGraphExamples/server_module_loc.js"></script>
-<!--	<script type="text/javascript" src="../../Studon/server_module.js"></script>-->
-
-<!--Configuration of SageCell-->
-	<script type="text/javascript">
-		if(useSageCell==true){
-			//Make the div with id 'sagecell' a Sage cell
-			sagecell.makeSagecell({	inputLocation:'#sagecell',
-									template: sagecell.templates.minimal,
-									evalButtonText:'Activate'});
-			//Make any div with class 'compute' a Sage cell
-			sagecell.makeSagecell({	inputLocation:'div.compute',
-									evalButtonText:'Evaluate'});
-		};
-	</script>
-	
-	<title>h-Methode</title>
+  <title>h-Methode</title>
 </head>
 
 <body>
-                    <h1 class="firstHeading">h-Methode</h1>
-                <br />
-                <p>
-                In diesem Beispiel wird für eine Funktion \(f:\mathbb{R}\to\mathbb{R}\) das Steigungsdreieck veranschaulicht.
-                Die Funktion kann im Textfeld eingegeben werden
-                </p>
+  <h1 class="firstHeading">h-Methode</h1>
+  <br />
+  <p>
+    In diesem Beispiel wird für eine Funktion \(f:\mathbb{R}\to\mathbb{R}\) das Steigungsdreieck veranschaulicht.
+    Die Funktion kann im Textfeld eingegeben werden
+  </p>
 
-<p>
-            \(f(x)=\)<input  id="functionf" value="(x^2+1)/2" /> &nbsp;&nbsp;&nbsp;
-            <input value="Anzeigen" onclick="updateFunction()" type="button"/><br/>
-            </p>
+  <p>
+    \(f(x)=\)<input id="functionf" value="(x^2+1)/2" /> &nbsp;&nbsp;&nbsp;
+    <input value="Anzeigen" onclick="updateFunction()" type="button" /><br />
+  </p>
 
-                <center>
-                    <div id="box1" class="jxgbox" style="width:500px; height:400px; "></div>
-<script language="JavaScript">
+  <center>
+    <div id="box1" class="jxgbox" style="width:500px; height:400px; "></div>
+    <script language="JavaScript">
 
-  var f, graph
+      var f, graph
 
-  var b1 = JXG.JSXGraph.initBoard('box1', {originX: 250, originY: 350, unitX: 100, unitY: 100, grid:true});
-  b1.snapToGrid =false;
-  b1.suspendUpdate();
-  b1axisx=b1.create('axis', [[0,0], [1,0]], {});
-  b1axisy=b1.create('axis', [[0,0], [0,1]], {});
+      var b1 = JXG.JSXGraph.initBoard('box1', { 
+        boundingBox: [-2.5,3.4,2.5,-0.5],
+        //originX: 250, originY: 350, unitX: 100, unitY: 100, 
+        grid: true, axis:true });
 
-  var f,graph,g;
-  
-function plot() {
-  b1.removeObject(graph)
-  f = b1.jc.snippet(document.getElementById("functionf").value, true, 'x');
-  graph = b1.create('functiongraph', [f,-10,10], {strokeColor:'#00ff00'});
+      var f, graph, g;
 
-  //define the derivative of f
-  g = JXG.Math.Numerics.D(f);
-}
+      function plot() {
+        b1.removeObject(graph)
+        f = b1.jc.snippet(document.getElementById("functionf").value, true, 'x');
+        graph = b1.create('functiongraph', [f, -10, 10], { strokeColor: '#00ff00' });
 
-  plot();
+        //define the derivative of f
+        g = JXG.Math.Numerics.D(f);
+      }
 
-  //glider on the curve
-  var p1x = b1.create('glider', [-1,0,b1axisx], {style:1, name:'x_0'});
-  var p1 = b1.create('point', [function(){return p1x.X();},function(){return f(p1x.X())}], {style:6, name:'f(x_0)'});
+      plot();
 
-
-  //a point on the tangent
-  //           variable x coordinate           variable y coordinate depending on the derivative of f at point p1.X()
-  var p2x = b1.create('glider', [0.5,0,b1axisx], {style:1, name:'x_0+h'});
-  var p2 = b1.create('point', [function(){return p2x.X();},function(){return f(p2x.X())}],
-        {style:1, name:'f(x_0+h)'});
-
-  //the secand
-  var l1 = b1.create('line', [p1,p2],{});
-  //a third point fpr the slope triangle
-  var p3 = b1.create('point',  [function(){if (f(p2x.X())< f(p1x.X())) {return p1x.X();} else {return p2x.X();}},
-         function(){if (f(p2x.X()) < f(p1x.X())) {return f(p2x.X());} else {return f(p1x.X());}}],{style:1, name:'', visible:false});
-
-  //the slope triangle
-  var pol = b1.create('polygon', [p1,p2,p3], {});
-  //  variable x coordinate           variable y coordinate depending on the derivative of f at point p1.X()
-  var p4 = b1.create('point',
-       [function() { return p1.X()+1;}, function() {return p1.Y()+JXG.Math.Numerics.D(graph.Y)(p1.X());}],
-       {style:1, name:'',visible:false});
-  var xTextG=1.5;
-  var p5 = b1.create('point', [function() { return xTextG;}, function() {return p1.Y()+(p2.Y()-p1.Y())*(xTextG-p1.X())/(p2.X()-p1.X())+0.1;}], {style:1, name:'',visible:false});
-  var tG = b1.create('text', [p5.X(),function(){return p5.Y()},"g_{h,x_0}"]);
-  var l2 = b1.create('line', [p1,p4],{style:2});
+      //glider on the curve
+      var p1x = b1.create('glider', [-1, 0, b1.defaultAxes.x], { style: 1, name: 'x_0' });
+      var p1 = b1.create('point', [function () { return p1x.X(); }, function () { return f(p1x.X()) }], { style: 6, name: 'f(x_0)' });
 
 
+      // a point on the tangent
+      // variable x coordinate  variable y coordinate depending on the derivative of f at point p1.X()
+      var p2x = b1.create('glider', [0.5, 0, b1.defaultAxes.x], { style: 1, name: 'x_0+h' });
+      var p2 = b1.create('point', [function () { return p2x.X(); }, function () { return f(p2x.X()) }],
+        { style: 1, name: 'f(x_0+h)' });
+
+      //the secand
+      var l1 = b1.create('line', [p1, p2], {});
+      //a third point fpr the slope triangle
+      var p3 = b1.create('point', [function () { if (f(p2x.X()) < f(p1x.X())) { return p1x.X(); } else { return p2x.X(); } },
+      function () { if (f(p2x.X()) < f(p1x.X())) { return f(p2x.X()); } else { return f(p1x.X()); } }], { style: 1, name: '', visible: false });
+
+      //the slope triangle
+      var pol = b1.create('polygon', [p1, p2, p3], {});
+      //  variable x coordinate           variable y coordinate depending on the derivative of f at point p1.X()
+      var p4 = b1.create('point',
+        [function () { return p1.X() + 1; }, function () { return p1.Y() + JXG.Math.Numerics.D(graph.Y)(p1.X()); }],
+        { style: 1, name: '', visible: false });
+      var xTextG = 1.5;
+      var p5 = b1.create('point', [function () { return xTextG; }, function () { return p1.Y() + (p2.Y() - p1.Y()) * (xTextG - p1.X()) / (p2.X() - p1.X()) + 0.1; }], { style: 1, name: '', visible: false });
+      var tG = b1.create('text', [p5.X(), function () { return p5.Y() }, "g_{h,x_0}"]);
+      var l2 = b1.create('line', [p1, p4], { style: 2 });
+
+      /*
+      t= b1.create('text', [function(){return p2.X()+0.1;},function(){return (p2.Y()-0.1);},
+      function(){ if (p2.X() != p1.X()) {return "m="+((p2.Y()-p1.Y())/(p2.X()-p1.X())).toFixed(2);} else {return "m="+(g(p1.X())).toFixed(2);}}],
+        (			     {});
+      */
+      /*
+      t= b1.create('text', [function(){return p2.X()+0.1;},function(){return (p2.Y()+p1.Y())/2;},function(){ return "m="+(JXG.Math.round(p2.Y()-p3.Y(),2));}],{});
+      */
 
 
-/*
-t= b1.create('text', [function(){return p2.X()+0.1;},function(){return (p2.Y()-0.1);},
-function(){ if (p2.X() != p1.X()) {return "m="+((p2.Y()-p1.Y())/(p2.X()-p1.X())).toFixed(2);} else {return "m="+(g(p1.X())).toFixed(2);}}],
-	(			     {});
-*/
-/*
-t= b1.create('text', [function(){return p2.X()+0.1;},function(){return (p2.Y()+p1.Y())/2;},function(){ return "m="+(JXG.Math.round(p2.Y()-p3.Y(),2));}],{});
-*/
+      function updateFunction() {
+        plot();
+        b1.update();
+      }
 
+    </script>
 
- b1.unsuspendUpdate();
+  </center>
 
- function updateFunction() {
-    b1.suspendUpdate();
-    plot();
-    b1.unsuspendUpdate();
- }
-
-</script>
-
-                </center>
-
-                </p>
+  </p>
 
 </body>
 <!--
 <footer>Wigand Rathmann, FAU, <a
 href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a></footer>
 -->
+
 </html>
