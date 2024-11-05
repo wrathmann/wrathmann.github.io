@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Taylor Polynomial</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" id="vv" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta charset="utf-8" />
+  <link href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js" type="text/javascript"
+    charset="UTF-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+
+  <style>
+    body {
+      margin: 50px;
+      display: grid;
+      grid-template-columns: 600px auto;
+      grid-template-rows: auto auto auto 600px;
+      column-gap: 20px;
+      row-gap: 20px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="jxgbox" class="jxgbox" style="width:800px; height:400px; "></div>
+
+  <script type='text/javascript'>
+    'use strict'
+    // init
+    JXG.Options.text.useMathJax = true;
+    var bGraph = null, bTayPol = null;
+    var ftxt, funf, graph, g, Df, x0, fdx = [], taylorpol = null, val;
+    // Taylor polynomial max degree
+    var sumMax = 20;
+
+    // generate board
+    var b1 = JXG.JSXGraph.initBoard('jxgbox', { axis: true, boundingBox: [-6, 5, 10, -3] });
+    var s = b1.create('slider', [[0.75, -1.5], [5.75, -1.5], [0, 1, sumMax]],
+      { frozen: true, name: 'S', snapWidth: 1, digits: 0 });
+    b1.snapToGrid = true;
+    var inputfx = b1.create('input', [-3.1, 4.5,
+      //'sin(x)', 
+      'x^4/8-x^2+2',
+      //'1/8*((x-2)*(x+2))^2', 
+      'f(x)='], { fixed: true, frozen: true });
+    var bplot = b1.create(
+      "button",
+      [
+        -3.1,
+        4.0,
+        "set function",
+        function () { plot() },
+      ],
+      { fixed: true, frozen: true }
+    );
+
+    // toggle buttons
+    bGraph = b1.create(
+      "button",
+      [
+        2,4.5,"graph",
+        function () {
+          toggleList([graph]);
+        },
+      ],
+      { fixed: true, frozen: true }
+    );
+    bTayPol = b1.create(
+      "button",
+      [ 2, 4,"Taylor polynomial",
+        function () {
+          toggleList([taylorpol]);
+        },
+      ],
+      { fixed: true, frozen: true }
+    );
+
+
+    // plot objects
+    plot();
+    // create list to toggle osculating circle
+
+    function plot() {
+      b1.removeObject([graph, taylorpol]);
+      // read strings for the functions
+      ftxt = inputfx.Value();
+      funf = [];
+      fdx = [];
+      funf[0] = b1.jc.snippet(ftxt, true, 'x');
+      // generate the derivatives
+      fdx[0] = ftxt;
+      for (let i = 1; i <= sumMax; i++) {
+        fdx.push(b1.jc.manipulate('D(' + fdx[i - 1] + ',x);'));
+        funf.push(b1.jc.snippet(fdx[i], true, 'x'));
+      }
+      // plot the function graph
+      graph = b1.create('functiongraph', [funf[0]]);
+      x0 = b1.create('glider', [1, 1, graph], { name: '\\((x_0,f(x_0))\\)' });
+
+      // plot the Taylor polynomial
+      taylorpol = b1.create('functiongraph', [
+        function (t) {
+          var h = (t - x0.X());
+          val = funf[s.Value()](x0.X());
+          for (let i = s.Value() - 1; i >= 0; i--) {
+            val = (val * h / (i + 1) + funf[i](x0.X()));
+          }
+          return val;
+        },
+        -10, 10],
+        { strokeColor: "#bb0000" });
+
+
+    }
+
+    // helper functions
+    function toggleList(inputList) {
+      for (let iloop = 0; iloop < inputList.length; iloop++) {
+        if (JXG.exists(inputList[iloop])) {
+          if (inputList[iloop].getAttribute("visible")) {
+            inputList[iloop].setAttribute({ visible: false });
+          } else {
+            inputList[iloop].setAttribute({ visible: true });
+            inputList[iloop].show();
+          }
+          inputList[iloop].update();
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
