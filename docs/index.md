@@ -1,7 +1,7 @@
 ---
 title:  Index page
 usingmathjax: true
-theme: minia
+theme: minima
 ---
 
 # JSXGraph Example collection
