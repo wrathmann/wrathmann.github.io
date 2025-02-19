@@ -60,7 +60,7 @@ In the following examples one can highlight probalities $P(a<=X<=b)$.
 - [Phasenportrait (inhomogenous)](./JSXGraphExamples/Phasenportrait.html)
 - [System of non-autonomous ODE](./JSXGraphExamples/Non-Autonomous-ODESystem.html)
 - [System of non-autonomous ODE (trajectory and time)](./JSXGraphExamples/Non-Autonomous-ODESystem-2.html)
-- [Heat equation (stationary, 1D)]
+- [Heat equation (stationary, 1D)](./JSXGraphExamples/ODE-HeatEquation-1D.html)
 
 ## Interactive Digital Assessement in Mathematics
 
