@@ -73,10 +73,10 @@ The links will direct to the IDIAM page.
 + [Roots of Complex numbers](https://idiamath.github.io/JSXGraphExamples/rootComplexNumbers.html)
 
 ## Linear Algebra
-+ [Linear Mapping $$\mathbb{R}^2\to \mathbb{R}^2$$ and coordinate unit vectors](https://idiamath.github.io/JSXGraphExamples/LinMappingUnitVectors.html) Just see the effect of setting the image of the unit vectors.
-+ [Linear Mapping $$\mathbb{R}^2\to \mathbb{R}^2$$ and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricies.html) 
-+ [Linear Mapping $$\mathbb{R}^2\to \mathbb{R}^2$$ and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricesUnitCircle.html) Demonstrated at a circle.
-+ [Linear Mapping $$\mathbb{R}^2\to \mathbb{R}^2$$ and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricesPolygon.html) Demonstrated at a polygon.
++ [Linear Mapping \\(\mathbb{R}^2\to \mathbb{R}^2\\) and coordinate unit vectors](https://idiamath.github.io/JSXGraphExamples/LinMappingUnitVectors.html) Just see the effect of setting the image of the unit vectors.
++ [Linear Mapping \\(\mathbb{R}^2\to \mathbb{R}^2\\) and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricies.html) 
++ [Linear Mapping \\(\mathbb{R}^2\to \mathbb{R}^2\\) and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricesUnitCircle.html) Demonstrated at a circle.
++ [Linear Mapping \\(\mathbb{R}^2\to \mathbb{R}^2\\) and Matrices](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricesPolygon.html) Demonstrated at a polygon.
 + [Rotation in  $$\mathbb{R}^2$$ ](https://idiamath.github.io/JSXGraphExamples/LinMappingMatricesPolygonRotating.html) Rotation of a polygon, matrix is displayed.
 + [Eigenvectors of a linear Mapping $$\mathbb{R}^2\to \mathbb{R}^2$$](https://idiamath.github.io/JSXGraphExamples/Eigenvectores.html) 
 + [Triple Product](https://idiamath.github.io/JSXGraphExamples/tripleProduct.html) Given by three points a volume can be constructed. This applet shows the idea of the contstuction.
