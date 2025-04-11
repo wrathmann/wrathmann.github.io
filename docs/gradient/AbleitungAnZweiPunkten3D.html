@@ -1,0 +1,221 @@
+<head>
+  <title>Implicit plot and functiongraph</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width" />
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0pt;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Implicit plot and functiongraph</h1>
+<p>
+  This applets demonstrats the usage of contourplots and functiongraphs of functions of two variables
+  in a single boards.
+</p>
+  <div id="jxgframe2" class="jxgbox" style="width: 500px; height: 500px">
+    <script>
+      var divid = "jxgframe2";
+    </script>
+  </div>
+  <script>
+    "use strict";
+    JXG.Options.text.useMathJax = true;
+    var board, box, view,
+      ffun, f3d, txtf, txtfx, txtfy,initX0=[],initX1=[],
+      cf = [],
+      cf2 = [],
+      cf3 = [],
+      Axy, A, A2, A2xy, lineA, lineA2, gl1, gl2,
+      niveauline = [], niveauopac = [], niveaunum, niveaumax, niveaumin, niveauh, legend;
+    board = JXG.JSXGraph.initBoard(divid, {
+      boundingbox: [-8, 8, 8, -10],
+      keepaspectratio: true,
+      axis: false
+    });
+    box = [-2, 2];
+    view = board.create("view3d", [
+      [-6, -6],
+      [8, 8],
+      [box, box, box]
+    ], {
+      projection: 'parallel',
+      axesPosition: 'border',
+      xPlaneRear: {
+        visible: false
+      },
+      xPlaneRearYAxis: {
+        visible: false
+      },
+      xPlaneRearZAxis: {
+        visible: false
+      },
+      yPlaneRear: {
+        visible: false
+      },
+      yPlaneRearXAxis: {
+        visible: false
+      },
+      yPlaneRearZAxis: {
+        visible: false
+      }
+    });
+    view.az_slide.setValue(3.4);
+    view.el_slide.setValue(1.1);
+    //slider-based curve
+
+    /* init variables */
+      /*
+      txtf = '{#f#}';
+      txtfx = '{#fdx#}';
+      txtfy = '{#f#dy}';
+      niveaunum = '{#niveaunum#}';
+      */
+      niveaunum = 7;
+      txtf = "cos(2*x)*cos(2*y)";
+      /*
+      txtf = "cos(2*x)*sin(2*y)";
+      txtf = "(2*x*x+y*y/2)/4-1";
+      txtf = "(1-x)^2 + 10*(y-x^2)^2"
+      */
+      txtfx = board.jc.manipulate("D(" + txtf + ",x);");
+      txtfy = board.jc.manipulate("D(" + txtf + ",y);");
+      initX0 = [0.2, -0.5];
+      initX1 = [-0.2, 0.5];
+    niveaunum = 7;
+    txtf = "cos(2*x)*cos(2*y)";
+
+    setObjective();
+    plot();
+
+    function plot() {
+      var i;
+      board.removeObject([f3d, Axy, A, lineA, cf2]);
+      /* let i = 1; i <= niveaunum; i++*/
+      niveauline = [];
+      for (i = 0; JXG.Math.lt(i, niveaunum); i++) {
+        let niveaui = niveaumin + (i + 1) * niveauh;
+        niveauline.push(niveaui.toFixed(2));
+        niveauopac.push(((6 + i) / (niveaunum + 5)) * 0.5);
+        cf.push(board.create("implicitcurve", [
+          txtf + "-(" + niveaui.toFixed(2) + ")", txtfx, txtfy, [-2, 2],
+          [-2, 2]
+        ], {
+          strokeWidth: 2,
+          strokeColor: '#000000', /*JXG.palette.black*/
+          strokeOpacity: niveauopac[i],
+          highlightStrokeColor: '#000000', /*JXG.palette.black*/
+          highlightStrokeOpacity: niveauopac[i],
+          needsRegularUpdate: false,
+          name: "niveau",
+          visible: false
+        }));
+        /* name wird genutzt, im den Index im curve3D array wieder zu finden*/
+        cf3.push(view.create("curve3d", [[], [], []], {
+          name: i,
+          strokeWidth: 1,
+          strokeOpacity: niveauopac[i],
+          strokeColor: '#000000'/*JXG.palette.red,*/
+        }));
+        cf3[i].updateDataArray = function () {
+          var ipt,
+            check;
+          this.dataX = [];
+          this.dataY = [];
+          this.dataZ = [];
+          for (ipt = 0; ipt < cf[this.name].numberPoints; ipt++) {
+            check = cf[this.name].points[ipt].usrCoords[1];
+            if (check > box[0] && check < box[1]) {
+              this.dataX.push(check);
+            }
+            else {
+              this.dataX.push(NaN);
+            }
+            check = cf[this.name].points[ipt].usrCoords[2];
+            if (check > box[0] && check < box[1]) {
+              this.dataY.push(check);
+            }
+            else {
+              this.dataY.push(NaN);
+            }
+            this.dataZ.push(box[0]);
+          }
+        };
+      }
+      legend = board.create('legend', [3, 4], {
+        labels: niveauline,
+        colors: [cf3[0].visProp.strokecolor],
+        strokeOpacity: niveauopac,
+        rowHeight: 15,
+        linelength: 1.2,
+        frozen: true
+      });
+      f3d = view.create("functiongraph3d", [ffun, box, box], {
+        strokeWidth: 0.5,
+        stepU: 70,
+        stepsV: 70,
+        strokeOpacity: 0.85
+      });
+
+      Axy = view.create("point3d", [initX0[0],initX0[1], -2], {
+        name: '\\(x_0\\)',
+        label: { strokeColor: JXG.palette.blue, fontSize: 20 }
+      });
+      A2xy = view.create("point3d", [initX1[0],initX1[1], -2], {
+        name: '\\(x_1\\)',
+        label: { strokeColor: JXG.palette.blue, fontSize: 20 }
+      });
+      // Project Axy to the surface
+      A = view.create("point3d", [() => [Axy.X(), Axy.Y(), ffun(Axy.X(), Axy.Y())]], {
+        name: '\\(f(x_0)\\)',
+        label: { strokeColor: JXG.palette.blue, fontSize: 20 }
+      });
+      A2 = view.create("point3d", [() => [A2xy.X(), A2xy.Y(), ffun(A2xy.X(), A2xy.Y())]], {
+        name: '\\(f(x_1)\\)',
+        label: { strokeColor: JXG.palette.blue, fontSize: 20 }
+      });
+      lineA = view.create("line3d", [Axy, A], {
+        dash: 1
+      });
+      lineA2 = view.create("line3d", [A2xy, A2], {
+        dash: 1
+      });
+      board.update();
+    }
+
+    function setObjective() {
+      ffun = board.jc.snippet(txtf, true, "x,y");
+      /* compute niveaumin, niveaumax */
+      var minx = -2,
+        miny = -2,
+        maxx = 2,
+        maxy = 2,
+        hx = 0.2,
+        hy = 0.2;
+      niveaumax = -100000;
+      niveaumin = 100000;
+      for (let xloop = minx; xloop < maxx; xloop += hx) {
+        for (let yloop = miny; yloop < maxy; yloop += hy) {
+          let fval = ffun(xloop, yloop);
+          if (niveaumax < fval) {
+            niveaumax = fval;
+          }
+          if (niveaumin > fval) {
+            niveaumin = fval;
+          }
+        }
+      }
+      niveauh = (niveaumax - niveaumin) / (niveaunum + 1);
+    }
+    /*stack_jxg.bind_point_dual(ans1Ref,gl1,gl2);*/
+  </script>
+
+  </script>
+</body>

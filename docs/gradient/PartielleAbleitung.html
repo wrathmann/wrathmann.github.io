@@ -1,0 +1,182 @@
+<head>
+  <title>Partial derivative</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width" />
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0pt;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Partial derivative</h1>
+  <p>
+    This applet was disigned to prepare an input for a STACK question, where the partial derivative wrt \(x\) or \(y\) should be zero.
+    Not always a solution is availabe, then "no solution" has to be checked.
+  </p>
+
+  <div id="jxgframe" style="width: 75vw; height: 75vh">
+    <script>
+      divid = "jxgframe";
+    </script>
+    <div id="jxgbox" class="jxgbox" style="width: 500px; height: 500px"></div>
+    <script>
+      divid = "jxgbox";
+    </script>
+  </div>
+  <!-- <script type="text/javascript" src="legendenh.js"> </script>-->
+  <script>
+    'use strict';
+    var board = JXG.JSXGraph.initBoard(divid, {
+      boundingbox: [-2, 1.5, 2, -2.5],
+      axis: true,
+      showFullscreen: true
+    }),
+      txtf, txtfx, txtfy, ffun,
+      cf = [], cconstraint, gradf, gradfx, gradfy, runningCont,
+      gradc, gl1, s, niveauline = [], niveaulinetxt, linevec,
+      niveaumin, niveaumax, niveaunum, niveauh, noSolFlag,
+      /* compute niveaumin, niveaumax */
+      minx = -2,
+      miny = -2,
+      maxx = 2,
+      maxy = 2,
+      hx = 0.2,
+      hy = 0.2;
+    niveaumax = -100000;
+    niveaumin = 100000;
+
+    //niveaunum={#niveaunum#};
+    niveaunum = 7;
+    niveauh = (niveaumax - niveaumin) / (niveaunum + 1);
+    txtf = 'x^2-y';
+    txtfx = board.jc.manipulate('D(' + txtf + ',x);');
+    txtfy = board.jc.manipulate('D(' + txtf + ',y);');
+    linevec = [-1, -1, 1, -1];
+
+
+    /* process question variables*/
+    txtf = txtf.replace(/%pi/g, 'PI');
+    txtfx = txtfx.replace(/%pi/g, 'PI');
+    txtfy = txtfy.replace(/%pi/g, 'PI');
+    s = board.create(
+      'slider',
+      [
+        [-1, 1.3],
+        [1, 1.3],
+        [0, 0.5, 1]
+      ],
+      { name: 'scale', snapWidth: 0.05 }
+    );
+    ffun = board.jc.snippet(txtf, true, 'x,y');
+    gradfx = board.jc.snippet(txtfx, true, 'x,y');
+    gradfy = board.jc.snippet(txtfy, true, 'x,y');
+
+    for (let xloop = minx; xloop < maxx; xloop += hx) {
+      for (let yloop = miny; yloop < maxy; yloop += hy) {
+        let fval = ffun(xloop, yloop);
+        if (niveaumax < fval) {
+          niveaumax = fval;
+        }
+        if (niveaumin > fval) {
+          niveaumin = fval;
+        }
+      }
+    }
+    niveauh = (niveaumax - niveaumin) / (niveaunum + 1);
+
+    plot();
+
+    function plot() {
+      board.removeObject([cf, cconstraint, gl1, gradf, gradc]);
+      niveauline = [];
+      let niveaui;
+      for (let i = 0; i < niveaunum; i++) {
+        niveaui = niveaumin + i * niveauh;
+        niveauline.push(niveaui.toFixed(2));
+        cf.push(
+          board.create(
+            'implicitcurve',
+            [txtf + '-(' + niveaui.toFixed(2) + ')', [-2, 2], [-2.5, 1.5]],
+            {
+              strokeWidth: 2,
+              strokeColor: JXG.palette.red,
+              strokeOpacity: i / niveaunum,
+              needsRegularUpdate: false
+            }
+          )
+        );
+      }
+      cconstraint = board.create(
+        'line',
+        [
+          [linevec[0], linevec[1]],
+          [linevec[2], linevec[3]]
+        ],
+        { straightFirst: false, straightLast: false }
+      );
+      gl1 = board.create('glider', [0.5, 0.7, cconstraint], {
+        name: '\\(x_0\\)'
+      });
+      gradf = board.create(
+        'arrow', [[() => {
+          return gl1.X();
+        },
+        () => {
+          return gl1.Y();
+        }
+        ],
+        [
+          () => {
+            return gl1.X() + gradfx(gl1.X(), gl1.Y()) * s.Value();
+          },
+          () => {
+            return gl1.Y() + gradfy(gl1.X(), gl1.Y()) * s.Value();
+          }
+        ]
+      ],
+        { strokeColor: JXG.palette.red }
+      );
+      /* running contour line */
+
+      gl1.on("drag", (e) => { updateRuningCont(); });
+      gl1.on("up", (e) => { runningCont.setAttribute({ visible: false }); });
+      gl1.on("down", (e) => { updateRuningCont(); });
+      noSolFlag = board.create('checkbox', [-1.75, -2.25, 'no solution'], { fontSize: 16 });
+      noSolFlag.on("change", function (e) {
+        return 1;
+      })
+      JXG.addEvent(noSolFlag.rendNodeCheckbox, 'change', function () {
+        if (this.Value()) {
+          gl1.setAttribute({ visible: false });
+          gradf.setAttribute({ visible: false });
+        } else {
+          gl1.setAttribute({ visible: true });
+          gradf.setAttribute({ visible: true });
+        }
+      }, noSolFlag);
+      board.update();
+    }
+    function updateRuningCont() {
+      board.removeObject(runningCont);
+      runningCont = board.create(
+        'implicitcurve',
+        [txtf + '-(' + ffun(gl1.X(), gl1.Y()).toFixed(2) + ')', [-2, 2], [-2.5, 1.5]],
+        {
+          strokeWidth: 2,
+          strokeColor: JXG.palette.blue,
+          strokeOpacity: 1,
+          needsRegularUpdate: false
+        }
+      );
+    }
+  </script>
+
+  </script>
+</body>
