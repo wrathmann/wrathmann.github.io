@@ -93,6 +93,9 @@ The links will direct to the IDIAM page.
 + [h-Method and Sine](https://idiamath.github.io/JSXGraphExamples/FunctionsSinDamped.html) The influence of the parameters of the damped sine function are demonstrated. 
 + [Tangent and osculating circle (numerical)](https://idiamath.github.io/JSXGraphExamples/OsculatingCircle-input-num.html) For a given function the tangent and the osculating circle is drawn. The derivatives are approximated numericaly. 
 + [Tangent and osculating circle (symbolic)](https://idiamath.github.io/JSXGraphExamples/OsculatingCircle-input-num.html) For a given function the tangent and the osculating circle is drawn. The derivatives are computed symbolicaly. 
+### Elementary functions
++[Definition Sine and Cosine](./JSXGraphExamples/function-Sine-Cosine.html)
++[Sine and Cosine (functiongraph)](./JSXGraphExamples/function-Sine-Cosine-graph.html)
 
 ## Calculus 2d
 + [Sequences in 2d](https://idiamath.github.io/JSXGraphExamples/ConvergenceSequences2D.html)  

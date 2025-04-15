@@ -1,0 +1,84 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <title>Sine and Cosine</title>
+</head>
+
+<body>
+
+    <h1 class="firstHeading">
+        Sine and Cosine</h1>
+    <p>
+        Definition of the Sine and Cosine function.
+    </p>
+    <center>
+        <div id="box1" class="jxgbox" style="width:500px; height:300px; "></div>
+    </center>
+
+    <br clear="all">
+    <script language="JavaScript">
+
+        var brd = JXG.JSXGraph.initBoard('box1', { boundingbox: [-1.42, 2.14, 5.71, -2.14], grid: false });
+        //var brd = JXG.JSXGraph.initBoard('jsxgraphbox5fd109b93bfc8', { originX: 100, originY: 150, unitX: 70, unitY: 70, grid: true });
+        brd.snapToGrid = false;
+        brd.suspendUpdate();
+        brdaxisx = brd.create('axis', [[0, 0], [1, 0]], {});
+        brdaxisy = brd.create('axis', [[0, 0], [0, 1]], {});
+
+
+        var getArg = function (c) {
+            if (c22.X() == 0) {
+                return 0;
+            }
+            if (c22.X() < 0) {
+                return Math.atan(c22.Y() / c22.X());
+            }
+            return Math.atan(c22.Y() / c22.X());
+        }
+
+        graphSin = brd.create('functiongraph', [function (t) { return Math.sin(t); }]);
+        graphCos = brd.create('functiongraph', [function (t) { return Math.cos(t); }], { strokeColor: 'orange' });
+        //graphCot = brd.create('functiongraph', [function(t) {return 1/Math.tan(t);}]);
+        m12 = brd.create('point', [0, 0], { name: 'M', visible: false });
+        p12 = brd.create('point', [1, 0], { name: 'Ex', visible: false });
+        //p2 = brd.create('point', [1,1], {name:'Exy',visible:false});
+        p32 = brd.create('point', [0, 1], { name: 'Ey', visible: false });
+        c12 = brd.create('circle', [m12, p12], { name: 'Einheitskreis', visible: true });
+        c22 = brd.create('glider', [0.1, 0.9, c12], { name: '(cos(φ),sin(φ))' });
+        //ca = getArg(c);
+
+
+        //p4 = brd.create('intersection',[line1,line2],{name:'(1,tan(x))',color:'#ff0055'});
+        angle2 = brd.create('angle', [p12, m12, c22], { name: 'φ', visible: true, radius: 1 });
+        //arc = brd.create('arc',[m1,p1,c], {name:' ',visible:true, radius:1, color:'#ffaa00'});
+        p62 = brd.create('point', [function () { return angle2.Value(); }, function () { return c22.Y(); }], { name: 'sin(φ)', visible: true });
+        p72 = brd.create('point', [function () { return angle2.Value(); }, function () { return c22.X(); }], { name: 'cos(φ)', visible: true });
+        p82 = brd.create('point', [function () { return angle2.Value(); }, 0], { name: 'φ', visible: true });
+        line42 = brd.create('polygon', [c22, p62], { strokeColor: '#aaaaff' });
+        line52 = brd.create('polygon', [p62, p72, p82], { strokeColor: '#aaffff' });
+
+
+        brd.unsuspendUpdate();
+
+    </script>
+    </center>
+
+    </p>
+
+</body>
+
+</html>

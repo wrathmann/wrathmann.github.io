@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
+
+    <title>Sine and Cosine</title>
+</head>
+
+<body>
+
+    <h1 class="firstHeading">
+        Sine and Cosine</h1>
+            <p>
+                Definition of the Sine and Cosine function.
+            </p>
+            <center>
+                <div id="box1" class="jxgbox" style="width:500px; height:500px; "></div>
+            </center>
+
+            <br clear="all">
+            <script language="JavaScript">
+
+                var b1 = JXG.JSXGraph.initBoard('box1', { boundingbox:[-1.5,1.5,2,-2] ,grid: false});
+                b1.snapToGrid = false;
+                b1.suspendUpdate();
+                b1axisx = b1.create('axis', [[0, 0], [1, 0]], {});
+                b1axisy = b1.create('axis', [[0, 0], [0, 1]], {});
+
+
+                var getArg = function (c) {
+                    if (c.X() == 0) {
+                        return 0;
+                    }
+                    if (c.X() < 0) {
+                        return Math.atan(c.Y() / c.X());
+                    }
+                    return Math.atan(c.Y() / c.X());
+                }
+
+                m1 = b1.create('point', [0, 0], { name: 'M', visible: false });
+                p1 = b1.create('point', [1, 0], { name: 'Ex', visible: false });
+                p2 = b1.create('point', [1, 1], { name: 'Exy', visible: false });
+                p3 = b1.create('point', [0, 1], { name: 'Ey', visible: false });
+                c1 = b1.create('circle', [m1, p1], { name: 'Einheitskreis', visible: true });
+                c = b1.create('glider', [0.7, 0.7, c1], { name: '(cos(φ),sin(φ))' });
+                c3 = b1.create('point', [function () { return 3 * c.X(); }, function () { return 3 * c.Y(); }], { name: 'P=(cos(φ),sin(φ))' });
+                //ca = getArg(c); 
+
+                line1 = b1.create('polygon', [m1, c3], { color: '#aaaaff', visible: true });
+                //line3 = b1.create('line', [p3,p2], {color:'#aaaaff'});
+
+                angle = b1.create('angle', [p1, m1, c], { name: ' ', visible: true, radius: 1 });
+                //arc = b1.create('arc',[m1,p1,c], {name:' ',visible:true, radius:1, color:'#ffaa00'});
+                p6 = b1.create('point', [function () { return Math.cos(angle.Value()); }, function () { return 0; }], { name: 'cos(φ)', visible: true });
+                p7 = b1.create('point', [function () { return 0; }, function () { return Math.sin(angle.Value()); }], { name: 'sin(φ)', visible: true });
+                line2 = b1.create('polygon', [c, p6], { strokeColor: '#aaaaff', dash: 2 });
+                line3 = b1.create('polygon', [c, p7], { color: '#aaaaff' });
+
+                //p8 = b1.create('point', [function(){return angle.Value();},-0.2], {name:'φ',visible:true});
+                //p9 = b1.create('point', [function(){return angle.Value();},function(){return Math.sin(angle.Value());}], {name:'sin(y)',visible:true});
+
+
+                t1 = b1.create('text',
+                    [function () { return Math.cos(angle.Value() / 2) * 0.5; },
+                    function () { return Math.sin(angle.Value() / 2) * 0.5 - 0.05; },
+                    function () { return "φ=" + (angle.Value() / Math.PI).toFixed(2) + "π"; }]);
+
+                t2 = b1.create('text',
+                    [0.75, -1.1,
+                        function () { return "cos(φ)=" + (p6.X()).toFixed(2); }]);
+                t3 = b1.create('text',
+                    [0.75, -1.25,
+                        function () { return "sin(φ)=" + (p7.Y()).toFixed(2); }]);
+
+                b1.unsuspendUpdate();
+
+
+            </script>
+            </center>
+
+            </p>
+
+</body>
+
+</html>
