@@ -18,3 +18,7 @@ Partial derivatives, gradient and tangential plane are central subjects in multi
 The ideas where shown in the talk of Meike Akveld and Wigand Rathmann at the International Meeting of the STACK Community 2025 in Durham 
 ([Program, Tuesday](https://sites.google.com/view/stack2025/schedule#h.82bngy1zy28l))
 
+Here more examples demonstrating derivatives will be found here.
+
+- [Grandient and constraints](./Implicit-lagrange.html) to demonstrate the idea of Karush-Kuhn-Tucker points
+
