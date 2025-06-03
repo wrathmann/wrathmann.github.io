@@ -13,9 +13,10 @@ theme: minima
 - [Osculating circle (input)](./JSXGraphExamples/Kruemmungskreis-input.html)
 
 ## Calculus (multivariate)
-The development of these applets where supportet by ERASMUS+ project KA226 [IDIAM](idiamath.github.io). 
+The development of these applets where supportet by ERASMUS+ project KA226 [IDIAM](https://idiamath.github.io). 
 
-- [Tangentplane](./JSXGraphExamples/Tangentplane.html)
+- [Tangentplane](./JSXGraphExamples/function3d-Tangentplane.html)
+- [local 2nd order approximation](./JSXGraphExamples/function3d-Taylor2.html)
 
 ## Calculus (symbolic)
 In these examples the function `js.manipulate` was used to the derivatives in a symbolic way. The examples are part of the talk **[Examples using the CAS of JSXGraph](https://jsxgraph.org/conf2024/program/rathmann/)** held at the **[JSXGraph2024](https://jsxgraph.uni-bayreuth.de/conf2024/)**
@@ -95,7 +96,7 @@ The links will direct to the IDIAM page.
 + [Tangent and osculating circle (symbolic)](https://idiamath.github.io/JSXGraphExamples/OsculatingCircle-input-num.html) For a given function the tangent and the osculating circle is drawn. The derivatives are computed symbolicaly. 
 ### Elementary functions
 + [Definition Sine and Cosine](./JSXGraphExamples/function-Sine-Cosine.html)
-+ [Sine and Cosine (functiongraph)](./JSXGraphExamples/function-Sine-Cosine-graph.html)
++ [Sine and Cosine (functiongraph)](./JSXGraphExamples/function-Sine-Cosine-Graph.html)
 
 ## Calculus 2d
 + [Sequences in 2d](https://idiamath.github.io/JSXGraphExamples/ConvergenceSequences2D.html)  
