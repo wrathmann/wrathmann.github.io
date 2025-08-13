@@ -1,0 +1,57 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+
+  <title>Taylorpolynom</title>
+</head>
+
+<body>
+  <div id="jxgbox1" class="jxgbox" style="width:800px; height:400px; "></div>
+  <br clear="all">
+
+
+  <script type='text/javascript'>
+    "use strict;"
+    JXG.Options.text.useMathJax = true;
+    var board1 = JXG.JSXGraph.initBoard('jxgbox1', { axis: true, originX: 300, originY: 150, unitX: 50, unitY: 50 });
+    board1.suspendUpdate();
+    var s = board1.create('slider', [[0.75, -1.5], [5.75, -1.5], [0, 10, 40]],
+      { name: 'S', snapWidth: 1, digits: 0 });
+    var graph = board1.create('functiongraph', [function (t) { return 1 / (t); }, -10, 10], { strokeColor: "#cccccc" });
+    var x0 = board1.create('glider', [1, 1, graph], { name: 'x<sub>0</sub>' });
+    board1.create('functiongraph', [
+      function (t) {
+        var h = (t - x0.X()) / -x0.X();
+        var val = 1;
+        for (var i = 1; i < Math.floor(s.Value()); i++) {
+          val = val + Math.pow(h, i);
+        }
+        return val / x0.X();
+      }, -10, 10], { strokeColor: "#bb0000" });
+    board1.unsuspendUpdate();
+  </script>
+  </p>
+
+  </p>
+
+
+
+
+</body>
+
+</html>

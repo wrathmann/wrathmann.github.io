@@ -1,0 +1,83 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+
+  <title>Potenz-/Taylorreihe für den Sinus</title>
+</head>
+
+<body>
+  <p>
+    The Taylor polynomial of a function \(f:\mathbf{R}\to\mathbf{R}\) is given by
+    $$T_{f,n}(x,x0)=\sum_{k=0}^n\frac{1}{k!}f^{(k)}(x_0)(x-x_0)^n,$$
+    if \(f\) is smooth enough.
+  </p>
+  <div id="jxgbox1" class="jxgbox" style="width:800px; height:400px; "></div>
+  <p>
+    This example is an extended version of
+    <a href="https://jsxgraph.uni-bayreuth.de/wiki/index.php/Power_Series_for_sine_and_cosine">JSXGraph Wiki Power
+      Series for sine and cosine</a>
+  </p>
+  <br clear="all">
+
+
+  <script type='text/javascript'>
+    "use strict;"
+    JXG.Options.text.useMathJax = true;
+    var board1 = JXG.JSXGraph.initBoard('jxgbox1', { axis: true, originX: 300, originY: 150, unitX: 50, unitY: 50 });
+    var graph = board1.createElement('functiongraph', [function (t) { return Math.sin(t); }, -10, 10], { strokeColor: "#cccccc" });
+    var s = board1.createElement('slider', [[0.75, -1.5], [5.75, -1.5], [0, 10, 40]],
+      { name: 'S', snapWidth: 1, digits: 0 });
+    var x0 = board1.createElement('glider', [1, 1, graph], { name: '\(x_0\)' });
+    board1.createElement('functiongraph', [
+      function (t) {
+        var h = t - x0.X();
+        var h0 = x0.X();
+        var val = 0;
+        var val1 = 0;
+        for (var i = 0; i < Math.floor(s.Value()) + 1; i++) {
+          var quot = i / 4;
+          var mod = (quot - Math.floor(quot)) * 4;
+          val1 = 0;
+          if (mod == 1) {
+            val1 = Math.cos(h0);
+          }
+          if (mod == 2) {
+            val1 = -Math.sin(h0);
+          }
+          if (mod == 3) {
+            val1 = -Math.cos(h0);
+          }
+          if (mod == 0) {
+            val1 = Math.sin(h0);
+          }
+          val = val + val1 / JXG.Math.factorial(i) * Math.pow(h, i);
+        }
+        return val;
+      }, -10, 10], { strokeColor: "#bb0000" });
+    board1.unsuspendUpdate();
+  </script>
+  </p>
+
+  </p>
+
+
+
+
+</body>
+
+</html>

@@ -8,6 +8,10 @@ theme: minima
 
 ## Calculus (univariate)
 
+- [Sequences in 1d (version 2)](./JSXGraphExamples/ConvergenceSequencesR1EpsV2.html) 
+- [Power series (sine, German)](./JSXGraphExamples/PotenzreiheSinus.html) 
+- [Power series (1/x, German)](./JSXGraphExamples/PotenzreiheSinus.html) 
+- [Limits of piecewise functions (German)](./JSXGraphExamples/FunctionLimitsAtx0.html) 
 - [Derivative of a function](./JSXGraphExamples/Calculus-Derivative.html) (h-method)
 - [Osculating circle](./JSXGraphExamples/Kruemmungskreis.html)
 - [Osculating circle (input)](./JSXGraphExamples/Kruemmungskreis-input.html)

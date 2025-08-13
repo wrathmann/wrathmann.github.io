@@ -1,0 +1,128 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Convergence of sequences</title>
+</head>
+
+<body>
+
+  <h1 class="firstHeading">
+    Convergence of sequences in \(\mathbb{R}\)</h1>
+  <center>
+    <div id="box" class="jxgbox" style="width:500px; height:500px; "></div>
+  </center>
+
+  <br clear="all">
+  <script type='text/javascript'>
+    "use strict"
+    var board = JXG.JSXGraph.initBoard('box', { axis: true, boundingbox: [-2, 2, 50, -2.1] });
+    var seq = board.create('curve', [[], []], { strokeColor: 'blue' });
+    var n, button1, button2, v2, v3, p1, p2, p3u, p3o, eps, p4u, p4o, pol, val, l1, l2, l3;
+    p1 = board.create('glider', [0, 1, board.defaultAxes.y],
+      { style: 1, name: 'h', strokeColor: JXG.palette.blue, fillColor: JXG.palette.blue });
+    p2 = board.create('point', [2, function () { return p1.Y() }], { visible: false });
+    l1 = board.create('line', [p1, p2], {});
+    v2 = board.create('point', [0, 0],
+      { size: 2, strokeColor: JXG.palette.red, name: "a_n", trace: false, visible: false });
+    v3 = board.create('point', [0, 0],
+      {
+        size: 1, fillColor: JXG.palette.green, strokeColor: JXG.palette.green,
+        name: "", trace: false, visible: false
+      });
+    eps = board.create('slider', [[32, -1.2], [42, -1.2], [0, 0.3, 1]],
+      { name: '&epsilon;', point1: { frozen: true }, point2: { frozen: true } });
+
+
+    var button1 = board.create('button', [5, -1.4, 'start', function () { start_approx(); }], { frozen: true });
+    var button2 = board.create('button', [11, -1.4, 'stop', function () { clear_all(); }], { frozen: true });
+    var inputan = board.create('input', [5, -1.2, '1/n', 'a_n='], { cssStyle: 'width: 100px', frozen: true });
+    var inputstart = board.create('input', [20, -1.2, '1', 'start at n='], { cssStyle: 'width: 50px', frozen: true });
+    var buttonex1 = board.create('button', [5, -1.6, '1/n', function () { updateInputAn('1/n'); }], { frozen: true });
+    var buttonex2 = board.create('button', [11, -1.6, '(-1)^n/n', function () { updateInputAn('(-1)^n/n'); }], { frozen: true });
+    var buttonex3 = board.create('button', [19, -1.6, '(-1)^n', function () { updateInputAn('(-1)^n'); }], { frozen: true });
+    var buttonex4 = board.create('button', [27, -1.6, '0.9^n', function () { updateInputAn('0.9^n'); }], { frozen: true });
+    var buttonex5 = board.create('button', [34, -1.6, '1+0.1*n', function () { updateInputAn('1+0.1*n'); }], { frozen: true });
+    var buttonex6 = board.create('button', [5, -1.8, '(1+1/n)^n/2', function () { updateInputAn('(1+1/n)^n/2'); }], { frozen: true });
+    var buttonex7 = board.create('button', [15, -1.8, '(-1)^n*(1.5+1/n)', function () { updateInputAn('(-1)^n*(1.5+1/n)'); }], { frozen: true });
+    var buttonex8 = board.create('button', [29, -1.8, '(1.5+(-1)^n/n)', function () { updateInputAn('(1.5+(-1)^n/n)'); }], { frozen: true });
+
+
+    p3u = board.create('point', [0, function () { return p1.Y() - eps.Value(); }], { size: 0, fillSColor: JXG.palette.blue, name: 'h-&epsilon;' });
+    p4u = board.create('point', [60, function () { return p1.Y() - eps.Value(); }], { visible: false });
+    l2 = board.create('line', [p3u, p4u], {});
+    p3o = board.create('point', [0, function () { return p1.Y() + eps.Value(); }], { size: 0, name: 'h+&epsilon;' });
+    p4o = board.create('point', [60, function () { return p1.Y() + eps.Value(); }], { visible: false });
+    l3 = board.create('line', [p3o, p4o], {});
+    pol = board.create('polygon', [p3u, p4u, p4o, p3o], {});
+
+    function updateInputAn(newstring) {
+      board.removeObject(inputan);
+      inputan = board.create('input', [5, -1.2, newstring, 'a_n='], { cssStyle: 'width: 100px' });
+
+    }
+
+    var seq_add = function () {
+      var val = a_n(n);
+      seq.dataX.push(n);
+      seq.dataY.push(val);
+      v2.setPosition(JXG.COORDS_BY_USER, [n, val]);
+      v3.setPosition(JXG.COORDS_BY_USER, [0, val]);
+      n++;
+    };
+
+    var txt1 = board.create('text', [15, 1.6,
+      function () {
+        let locy = (seq.dataY.length > 0) ? seq.dataY[seq.dataY.length - 1] : 0;
+        return 'n=' + (seq.dataX.length - 1) + ': value = ' + locy.toFixed(3);
+      }],
+      { strokeColor: 'blue' });
+
+    var TO;
+
+    var approx = function () {
+      seq_add();
+      board.update();
+      if (n <= 50) {
+        TO = setTimeout(approx, 500);
+      }
+    };
+
+    var a_n;
+    var start_approx = function () {
+      a_n = board.jc.snippet(inputan.Value(), true, 'n', true);
+      seq.dataX = [];
+      seq.dataY = [];
+      n = board.jc.snippet(inputstart.Value(), false, ' ', false);
+      val = a_n(n);
+      v2.setPosition(JXG.COORDS_BY_USER, [n, val]);
+      v2.setAttribute({ visible: true, trace: true });
+      v3.setPosition(JXG.COORDS_BY_USER, [0, val]);
+      v3.setAttribute({ visible: true, trace: true });
+      v2.clearTrace();
+      v3.clearTrace();
+      approx();
+    }
+
+    var clear_all = function () {
+      clearTimeout(TO);
+    };
+  </script>
+
+
+</body>
+
+</html>
