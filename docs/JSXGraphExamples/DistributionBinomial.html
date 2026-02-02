@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width">
-  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
   </script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
 
@@ -27,7 +28,7 @@
 
   <h2>Binomial distribution</h2>
   <p>
-    \(p\in[0,1]\) and \(n\in\mathbb{N}\) are given.  
+    \(p\in[0,1]\) and \(n\in\mathbb{N}\) are given.
     The densitiy function is \(P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}\) with \(k\in\{0,\dots n\}\)
   </p>
 
@@ -40,8 +41,10 @@
   <script language="JavaScript">
     JXG.Options.text.useMathJax = true;
     board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true, showCopyright: false });
+    var Nmax = 20;
+    var pointsdf =[];
     var prob = board.create('slider', [[1, 1], [4, 1], [0, .5, 1]], { name: 'p', snapWidth: 0.05 });
-    var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, 20]], { name: 'n', snapWidth: 1 });
+    var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, Nmax]], { name: 'n', snapWidth: 1 });
     //N.on('up',(e)=>plot());
     N.on('drag', (e) => plot());
     var fvals = [], xvals = [];
@@ -49,29 +52,34 @@
 
     function plot() {
       var Nloc = N.Value();
-      board.removeObject([binomialpdf, f]);
-      fvals = [], xvals = [];
+      board.removeObject([binomialpdf, f,pointsdf]);
+      fvals = [], xvals = [];pointsdf=[];
       for (let i = 0; i < Nloc + 1; i++) {
         xvals.push(i);
         fvals.push((function (_il) { return (() => { return binomial(Nloc, _il, prob.Value()) }) })(i));
       }
       binomialpdf = board.create('chart', [xvals, fvals], { chartStyle: 'bar', width: 0.8, colors: ['#3F4C6B'] });
-      f = board.create('functiongraph', [function (x) {
-        var dist = 0;
+      f = board.create('functiongraph', [(x) => binomialdf(Nloc, x)], { strokeWidth: 2 });
 
-        for (let n = 0; n < Nloc + 1; n++) {
-          if (x < n) {
-            return dist;
-          }
-          dist = dist + binomial(Nloc, n, prob.Value());
-        }
-        return dist;
-      }]);
-
+      for (i = 0; i<Nloc+1;i++)
+      {
+        pointsdf.push(board.create('point',[xvals[i],
+        (function (_il) { return (() => { return binomialdf(Nloc, _il ) }) })(i)],
+      {name:'',strokeColor:JXG.palette.blue,fillColor:JXG.palette.blue, size:1}));
+      }
     }
 
+    function binomialdf(Nloc, x) {
+      var dist = 0;
 
-
+      for (let n = 0; n < Nloc + 1; n++) {
+        if (x < n) {
+          return dist;
+        }
+        dist = dist + binomial(Nloc, n, prob.Value());
+      }
+      return dist;
+    }
 
     function binomial(n, k, p) {
 

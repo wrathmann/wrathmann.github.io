@@ -40,10 +40,11 @@
    </p>
    <script language="JavaScript">
       JXG.Options.text.useMathJax = true;
-      var probchart, pText;
+      var probchart, pText,pointsdf=[];
       board = JXG.JSXGraph.initBoard('box2', { boundingbox: [-1, 1.1, 21, -.1], axis: true, showCopyright: false });
+      var Nmax = 20;
       var prob = board.create('slider', [[1, 1], [4, 1], [0, .5, 1]], { name: 'p', snapWidth: 0.05 });
-      var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, 20]], { name: 'n', snapWidth: 1 });
+      var N = board.create('slider', [[1, 0.95], [4, 0.95], [1, 10, Nmax]], { name: 'n', snapWidth: 1,digits:0 });
       //N.on('up',(e)=>plot());
       N.on('drag', (e) => plot());
       var fvals = [], xvals = [];
@@ -51,29 +52,26 @@
 
       function plot() {
          var Nloc = N.Value();
-         board.removeObject([binomialpdf, f]);
+         board.removeObject([binomialpdf, f, pointsdf]);
+         pointsdf = [];
          fvals = [], xvals = [];
          for (let i = 0; i < Nloc + 1; i++) {
             xvals.push(i);
             fvals.push((function (_il) { return (() => { return binomial(Nloc, _il, prob.Value()) }) })(i));
          }
          binomialpdf = board.create('chart', [xvals, fvals], { chartStyle: 'bar', width: 0.8, colors: ['#3F4C6B'] });
-         f = board.create('functiongraph', [function (x) {
-            var dist = 0;
+         f = board.create('functiongraph', [(x) => binomialdf(Nloc, x)], { strokeWidth: 2 });
 
-            for (let n = 0; n < Nloc + 1; n++) {
-               if (x < n) {
-                  return dist;
-               }
-               dist = dist + binomial(Nloc, n, prob.Value());
-            }
-            return dist;
-         }]);
+         for (i = 0; i < Nloc + 1; i++) {
+            pointsdf.push(board.create('point', [xvals[i],
+            (function (_il) { return (() => { return binomialdf(Nloc, _il) }) })(i)],
+               { name: '', strokeColor: JXG.palette.blue, fillColor: JXG.palette.blue, size:1 }));
+         }
 
       }
 
       var plotprob = function () {
-         board.removeObject([probchart,pText]);
+         board.removeObject([probchart, pText]);
          var xvalsloc = [];
          var fvalsloc = [];
          var probval = 0;
@@ -85,12 +83,12 @@
          probchart = board.create('chart', [xvalsloc, fvalsloc],
             { chartStyle: 'bar', width: 0.8, colors: [JXG.palette.red] });
          pText = board.create('text',
-            [12,0.95,'\\(P(a\\leqslant X \\leqslant b)='+probval.toFixed(2)+'\\)']);
+            [12, 0.95, '\\(P(a\\leqslant X \\leqslant b)=' + probval.toFixed(2) + '\\)']);
 
       }
 
-      var p1x = board.create('glider', [0, 0, board.defaultAxes.x], { style: 1, name: 'a' });
-      var p2x = board.create('glider', [5, 0, board.defaultAxes.x], { style: 1, name: 'b' });
+      var p1x = board.create('glider', [2, 0, board.defaultAxes.x], { style: 1, name: 'a', size:5 });
+      var p2x = board.create('glider', [5, 0, board.defaultAxes.x], { style: 1, name: 'b', size:5 });
       board.updateConditions = function () {
          p1x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p1x.X())), 0], board);
          p2x.coords = new JXG.Coords(JXG.COORDS_BY_USER, [1, Math.max(0, Math.round(p2x.X())), 0], board);
@@ -107,6 +105,17 @@
 
 
 
+      function binomialdf(Nloc, x) {
+         var dist = 0;
+
+         for (let n = 0; n < Nloc + 1; n++) {
+            if (x < n) {
+               return dist;
+            }
+            dist = dist + binomial(Nloc, n, prob.Value());
+         }
+         return dist;
+      }
 
       function binomial(n, k, p) {
 
