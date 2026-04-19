@@ -63,6 +63,7 @@ In the following examples one can highlight probalities $P(a<=X<=b)$.
 ### System of ODEs
 - [Show 2D vectorfields](./JSXGraphExamples/Vektorfelder-anzeigen-input.html) In this applet the vectorfield can be edited via input fields.
 - [Lotka-Voltera](./JSXGraphExamples/vectorfield-Lotka.html) 
+- [Epidemic model (SIR)](./JSXGraphExamples/Epidemic-SIR.html)
 - [2x2 System over time](./JSXGraphExamples/ODE-System2x2-time.html)
 - [2x2 System tracectory](./JSXGraphExamples/ODE-System2x2-portrait.html)
 - [2x2 System tracectory ODE (Euler, Heun, RK4)](./JSXGraphExamples/ODESystem-Solver.html)
@@ -136,4 +137,3 @@ The links will direct to the IDIAM page.
 + [Vector Field 3d at surface](https://idiamath.github.io/JSXGraphExamples/vectorfield3D-surface-input.html) Surface given by a function $$s:[-1,1]^2\to\mathbb{R}^3$$ and the vectorfield $$V:\mathbb{R}^3\to\mathbb{R}^3$$ the vectofield is plotted at the surface.
 + [Vector Field 3d at curve](https://idiamath.github.io/JSXGraphExamples/vectorfield3D-curve-input.html) Curve given by a function $$c:[-1,1]\to\mathbb{R}^3$$ and the vectorfield $$V:\mathbb{R}^3\to\mathbb{R}^3$$ the vectorfield is plotted at the curve.
 + [Vector Field 3d with slider](https://idiamath.github.io/JSXGraphExamples/vectorfield3D-curve-slider.html) Curve can be manipulated by sliders, the vectorfield as well. Both is hard coded in the applet.
-

@@ -1,0 +1,515 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    .sir-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Prevent grid columns from expanding due to large min-content widths inside JSXGraph containers */
+    .sir-grid>* {
+      min-width: 0;
+    }
+
+    .sir-panel {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .sir-panel h2 {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+    }
+
+    .sir-math {
+      white-space: nowrap;
+    }
+
+    .sir-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 90px;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .sir-row input[type="range"] {
+      width: 100%;
+    }
+
+    .sir-row output {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sir-small {
+      font-size: 12px;
+      color: #444;
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+
+    .sir-plot {
+      width: 100%;
+      height: 600px;
+    }
+
+    .sir-caption {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 14px;
+      color: #222;
+    }
+
+    .sir-legend {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #222;
+    }
+
+    .sir-key {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .sir-swatch {
+      display: inline-block;
+      width: 22px;
+      height: 0;
+      border-top: 3px solid transparent;
+    }
+
+    .sir-swatch.solid {
+      border-top-style: solid;
+    }
+
+    .sir-swatch.dashed {
+      border-top-style: dashed;
+    }
+  </style>
+
+  <title>SIR Epidemic Model</title>
+</head>
+
+<body>
+  <h1>SIR Epidemic Model</h1>
+  <p>
+    Consider the SIR system
+    \[
+    \begin{aligned}
+    \dot S(t) &= -\alpha\,S(t)\,I(t),\\
+    \dot I(t) &= \alpha\,S(t)\,I(t)-\beta\,I(t),\\
+    \dot R(t) &= \beta\,I(t),
+    \end{aligned}
+    \]
+    where \(S(t)\) denotes the number of susceptible individuals, \(I(t)\) the number of infectious individuals,
+    and \(R(t)\) the number of recovered (or removed) individuals at time \(t\).
+    A conserved quantity of this ODE system is \(N(t):=S(t)+I(t)+R(t)\), which remains constant in the exact model
+    and should be approximately constant in the numerical simulation.
+  </p>
+  <p>
+    Parameters: \(\alpha\ge 0\) is the infection rate (mass action), and \(\beta\ge 0\) is the recovery rate.
+    Initial values: \(S_0=S(0)\), \(I_0=I(0)\), \(R_0=R(0)\) (absolute counts).
+    Simulation settings: final time \(T\), number of time steps \(N_{\mathrm{st}}\), and step size \(h=T/N_{\mathrm{st}}\).
+    The widget recomputes \(h\) automatically from \(T\) and \(N_{\mathrm{st}}\).
+  </p>
+
+  <div class="sir-grid">
+    <div class="sir-panel">
+      <h2>Parameters</h2>
+
+      <div class="sir-row">
+        <label for="alphaRange"><span class="sir-math">\(\alpha\)</span></label>
+        <input id="alphaRange" type="range" min="0" max="0.01" step="0.0001" value="0.0005">
+        <output id="alphaVal"></output>
+      </div>
+      <div class="sir-row">
+        <label for="betaRange"><span class="sir-math">\(\beta\)</span></label>
+        <input id="betaRange" type="range" min="0" max="2" step="0.01" value="0.10">
+        <output id="betaVal"></output>
+      </div>
+
+      <h2 style="margin-top:14px;">Initial values</h2>
+      <div class="sir-row">
+        <label for="S0Range"><span class="sir-math">\(S_0\)</span></label>
+        <input id="S0Range" type="range" min="0" max="20000" step="1" value="999">
+        <output id="S0Val"></output>
+      </div>
+      <div class="sir-row">
+        <label for="I0Range"><span class="sir-math">\(I_0\)</span></label>
+        <input id="I0Range" type="range" min="0" max="20000" step="1" value="1">
+        <output id="I0Val"></output>
+      </div>
+      <div class="sir-row">
+        <label for="R0Range"><span class="sir-math">\(R_0\)</span></label>
+        <input id="R0Range" type="range" min="0" max="20000" step="1" value="0">
+        <output id="R0Val"></output>
+      </div>
+
+      <h2 style="margin-top:14px;">Simulation</h2>
+      <div class="sir-row">
+        <label for="TRange"><span class="sir-math">\(T\)</span></label>
+        <input id="TRange" type="range" min="1" max="365" step="1" value="160">
+        <output id="TVal"></output>
+      </div>
+      <div class="sir-row">
+        <label for="NstRange"><span class="sir-math">\(N_{\mathrm{st}}\)</span></label>
+        <input id="NstRange" type="range" min="10" max="10000" step="10" value="4000">
+        <output id="NstVal"></output>
+      </div>
+
+      <div class="sir-small" id="infoText"></div>
+    </div>
+
+    <div>
+      <div id="jxgboxTime" class="jxgbox sir-plot"></div>
+      <div class="sir-caption sir-math">Time series: \(S(t), I(t), R(t), N(t)\)</div>
+      <div class="sir-legend">
+        <span class="sir-key"><span class="sir-swatch solid" style="border-top-color:#1f77b4;"></span><span class="sir-math">\(S(t)\)</span></span>
+        <span class="sir-key"><span class="sir-swatch solid" style="border-top-color:#d62728;"></span><span class="sir-math">\(I(t)\)</span></span>
+        <span class="sir-key"><span class="sir-swatch solid" style="border-top-color:#2ca02c;"></span><span class="sir-math">\(R(t)\)</span></span>
+        <span class="sir-key"><span class="sir-swatch dashed" style="border-top-color:#111111;"></span><span class="sir-math">\(N(t)\)</span></span>
+      </div>
+    </div>
+
+    <div>
+      <div id="jxgboxPhase" class="jxgbox sir-plot"></div>
+      <div class="sir-caption sir-math">Phase space: \((S(t), I(t))\)</div>
+      <div class="sir-legend">
+        <span class="sir-key"><span class="sir-swatch solid" style="border-top-color:#d62728;"></span><span class="sir-math">\((S(t), I(t))\)</span></span>
+      </div>
+    </div>
+  </div>
+
+  <script language="JavaScript">
+    JXG.Options.text.useMathJax = true;
+
+    var boardPhase, boardTime;
+    var alphaRange, betaRange;
+    var S0Range, I0Range, R0Range;
+    var TRange, NstRange;
+    var alphaVal, betaVal, S0Val, I0Val, R0Val, TVal, NstVal, infoText;
+    var infoN0, infoH;
+
+    var curvePhase, curveS, curveI, curveR, curveN;
+    var sim = { t: [], S: [], I: [], R: [], N: [] };
+    var timeAxisLabelX, phaseAxisLabelX, phaseAxisLabelY;
+
+    function parseNumber(value, fallback) {
+      var n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function parseIntNumber(value, fallback) {
+      var n = parseInt(value, 10);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function readParams() {
+      var alpha = parseNumber(alphaRange.value, 0.0005);
+      var beta = parseNumber(betaRange.value, 0.1);
+
+      var S0 = parseNumber(S0Range.value, 999);
+      var I0 = parseNumber(I0Range.value, 1);
+      var R0 = parseNumber(R0Range.value, 0);
+
+      if (S0 < 0) S0 = 0;
+      if (I0 < 0) I0 = 0;
+      if (R0 < 0) R0 = 0;
+
+      var T = parseNumber(TRange.value, 160);
+      if (T <= 0) T = 160;
+
+      var Nst = parseIntNumber(NstRange.value, 4000);
+      if (Nst < 10) Nst = 10;
+      Nst = Math.min(Nst, parseIntNumber(NstRange.max, 10000));
+      NstRange.value = String(Nst);
+
+      var h = T / Nst;
+
+      return { alpha: alpha, beta: beta, S0: S0, I0: I0, R0: R0, T: T, Nst: Nst, h: h };
+    }
+
+    function computeSimulation(params) {
+      var I = [0, params.T];
+      var N = params.Nst;
+
+      var f = function (t, x) {
+        var S = x[0];
+        var I = x[1];
+        var dS = -params.alpha * S * I;
+        var dI = params.alpha * S * I - params.beta * I;
+        var dR = params.beta * I;
+        return [dS, dI, dR];
+      };
+
+      var x0 = [params.S0, params.I0, params.R0];
+      var data = JXG.Math.Numerics.rungeKutta('rk4', x0, I, N, f);
+
+      var t = [];
+      var Sarr = [];
+      var Iarr = [];
+      var Rarr = [];
+      var Narr = [];
+
+      var h = (I[1] - I[0]) / N;
+      for (var k = 0; k < data.length; k++) {
+        var tk = I[0] + k * h;
+        var Sk = data[k][0];
+        var Ik = data[k][1];
+        var Rk = data[k][2];
+        t.push(tk);
+        Sarr.push(Sk);
+        Iarr.push(Ik);
+        Rarr.push(Rk);
+        Narr.push(Sk + Ik + Rk);
+      }
+
+      return { t: t, S: Sarr, I: Iarr, R: Rarr, N: Narr };
+    }
+
+    function updateBoundingBoxes(params, simData) {
+      var N0 = params.S0 + params.I0 + params.R0;
+      if (!Number.isFinite(N0) || N0 === 0) N0 = 1;
+
+      var yMax = N0;
+      for (var i = 0; i < simData.N.length; i++) {
+        if (Number.isFinite(simData.N[i])) yMax = Math.max(yMax, simData.N[i]);
+      }
+      if (!Number.isFinite(yMax) || yMax <= 0) yMax = 1;
+      yMax = Math.max(yMax, 1.0);
+
+      var labelPadPx = 40; // space for axis labels in pixels
+      var timeW = (boardTime && boardTime.containerObj) ? boardTime.containerObj.clientWidth : 700;
+      var timeH = (boardTime && boardTime.containerObj) ? boardTime.containerObj.clientHeight : 600;
+      timeW = Math.max(1, timeW);
+      timeH = Math.max(1, timeH);
+
+      var padT = (labelPadPx * params.T) / timeW;
+      var padY = (labelPadPx * yMax) / timeH;
+      // Keep padding small enough to avoid negative tick labels in typical ranges.
+      padT = Math.max(padT, 1e-6);
+      padY = Math.max(padY, 1e-6);
+      var timeBox = [-padT, yMax + padY, params.T + padT, -padY];
+
+      // Requirement: phase plot axes from 0 to max(N(t))
+      // Add padding (in coordinate units) derived from pixel padding to keep labels visible.
+      var phaseW = (boardPhase && boardPhase.containerObj) ? boardPhase.containerObj.clientWidth : 600;
+      var phaseH = (boardPhase && boardPhase.containerObj) ? boardPhase.containerObj.clientHeight : 600;
+      phaseW = Math.max(1, phaseW);
+      phaseH = Math.max(1, phaseH);
+      var padPhaseX = (labelPadPx * yMax) / phaseW;
+      var padPhaseY = (labelPadPx * yMax) / phaseH;
+      padPhaseX = Math.max(padPhaseX, 1e-6);
+      padPhaseY = Math.max(padPhaseY, 1e-6);
+      var phaseBox = [-padPhaseX, yMax + padPhaseY, yMax + padPhaseX, -padPhaseY]; // x=S, y=I
+
+      boardPhase.setBoundingBox(phaseBox, false);
+      boardTime.setBoundingBox(timeBox, false);
+    }
+
+    function recompute(params) {
+      sim = computeSimulation(params);
+      updateBoundingBoxes(params, sim);
+    }
+
+    function init() {
+      boardTime = JXG.JSXGraph.initBoard('jxgboxTime', {
+        axis: true,
+        boundingbox: [0, 1.1, 50, -0.1]
+      });
+
+      boardPhase = JXG.JSXGraph.initBoard('jxgboxPhase', {
+        axis: true,
+        boundingbox: [0, 10, 10, 0]
+      });
+
+      // Axis labels near arrow tips (JSXGraph axis label positioning is version-dependent).
+      // Time plot: label x-axis only.
+      timeAxisLabelX = boardTime.create('text', [
+        function () {
+          var bb = boardTime.getBoundingBox();
+          var w = (bb[2] - bb[0]);
+          var h = (bb[1] - bb[3]);
+          return [bb[2] - 0.02 * w, 0 + 0.03 * h];
+        },
+        '\\(t\\)'
+      ], { fixed: true, anchorX: 'right' });
+
+      // Phase plot: label both axes.
+      phaseAxisLabelX = boardPhase.create('text', [
+        function () {
+          var bb = boardPhase.getBoundingBox();
+          var w = (bb[2] - bb[0]);
+          var h = (bb[1] - bb[3]);
+          return [bb[2] - 0.02 * w, 0 + 0.03 * h];
+        },
+        '\\(S\\)'
+      ], { fixed: true, anchorX: 'right' });
+
+      phaseAxisLabelY = boardPhase.create('text', [
+        function () {
+          var bb = boardPhase.getBoundingBox();
+          var w = (bb[2] - bb[0]);
+          var h = (bb[1] - bb[3]);
+          return [0 + 0.03 * w, bb[1] - 0.02 * h];
+        },
+        '\\(I\\)'
+      ], { fixed: true, anchorX: 'left' });
+
+      curvePhase = boardPhase.create('curve', [[], []], { strokeWidth: 3, strokeColor: JXG.palette.red });
+      curvePhase.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        for (var i = 0; i < sim.S.length; i++) {
+          this.dataX[i] = sim.S[i];
+          this.dataY[i] = sim.I[i];
+        }
+      };
+
+      curveS = boardTime.create('curve', [[], []], { strokeWidth: 2, strokeColor: '#1f77b4' });
+      curveS.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        for (var i = 0; i < sim.t.length; i++) {
+          this.dataX[i] = sim.t[i];
+          this.dataY[i] = sim.S[i];
+        }
+      };
+      curveI = boardTime.create('curve', [[], []], { strokeWidth: 2, strokeColor: '#d62728' });
+      curveI.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        for (var i = 0; i < sim.t.length; i++) {
+          this.dataX[i] = sim.t[i];
+          this.dataY[i] = sim.I[i];
+        }
+      };
+      curveR = boardTime.create('curve', [[], []], { strokeWidth: 2, strokeColor: '#2ca02c' });
+      curveR.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        for (var i = 0; i < sim.t.length; i++) {
+          this.dataX[i] = sim.t[i];
+          this.dataY[i] = sim.R[i];
+        }
+      };
+      curveN = boardTime.create('curve', [[], []], { strokeWidth: 2, dash: 2, strokeColor: '#111111' });
+      curveN.updateDataArray = function () {
+        this.dataX = [];
+        this.dataY = [];
+        for (var i = 0; i < sim.t.length; i++) {
+          this.dataX[i] = sim.t[i];
+          this.dataY[i] = sim.N[i];
+        }
+      };
+    }
+
+    function updateInfo(params) {
+      var N0 = params.S0 + params.I0 + params.R0;
+      infoN0.textContent = N0.toFixed(3);
+      infoH.textContent = params.h.toFixed(7);
+    }
+
+    function syncOutputs(params) {
+      alphaVal.value = Number(params.alpha).toPrecision(4);
+      betaVal.value = Number(params.beta).toPrecision(3);
+      S0Val.value = String(Math.round(params.S0));
+      I0Val.value = String(Math.round(params.I0));
+      R0Val.value = String(Math.round(params.R0));
+      TVal.value = String(Math.round(params.T));
+      NstVal.value = String(Math.round(params.Nst));
+    }
+
+    function plot() {
+      var params = readParams();
+      recompute(params);
+      syncOutputs(params);
+      updateInfo(params);
+      boardPhase.update();
+      boardTime.update();
+    }
+
+    function wireControls() {
+      alphaRange.addEventListener('input', function () { plot(); });
+      betaRange.addEventListener('input', function () { plot(); });
+      S0Range.addEventListener('input', function () { plot(); });
+      I0Range.addEventListener('input', function () { plot(); });
+      R0Range.addEventListener('input', function () { plot(); });
+
+      TRange.addEventListener('input', function () { plot(); });
+      NstRange.addEventListener('input', function () { plot(); });
+    }
+
+    function initControls() {
+      alphaRange = document.getElementById('alphaRange');
+      betaRange = document.getElementById('betaRange');
+      S0Range = document.getElementById('S0Range');
+      I0Range = document.getElementById('I0Range');
+      R0Range = document.getElementById('R0Range');
+      TRange = document.getElementById('TRange');
+      NstRange = document.getElementById('NstRange');
+
+      alphaVal = document.getElementById('alphaVal');
+      betaVal = document.getElementById('betaVal');
+      S0Val = document.getElementById('S0Val');
+      I0Val = document.getElementById('I0Val');
+      R0Val = document.getElementById('R0Val');
+      TVal = document.getElementById('TVal');
+      NstVal = document.getElementById('NstVal');
+      infoText = document.getElementById('infoText');
+
+      infoText.innerHTML =
+        '<span class="sir-math">\\(N_0=\\)</span><span id="infoN0"></span><br>' +
+        '<span class="sir-math">\\(h=\\)</span><span id="infoH"></span>';
+      infoN0 = document.getElementById('infoN0');
+      infoH = document.getElementById('infoH');
+    }
+
+    initControls();
+    init();
+    wireControls();
+    plot();
+
+    // Typeset MathJax inside the control panel labels (MathJax is loaded async).
+    (function typesetControlsWhenReady() {
+      var remaining = 200; // ~10s at 50ms
+      function tick() {
+        if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+          MathJax.typesetPromise();
+          return;
+        }
+        remaining -= 1;
+        if (remaining > 0) setTimeout(tick, 50);
+      }
+      tick();
+    })();
+  </script>
+</body>
+
+<footer>Wigand Rathmann, FAU</footer>
+
+</html>
