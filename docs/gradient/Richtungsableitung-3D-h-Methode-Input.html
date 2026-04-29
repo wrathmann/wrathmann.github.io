@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Directional Derivative</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" id="vv" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta charset="utf-8" />
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+  <style>
+    body {
+      margin: 50px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Directional Derivative</h1>
+  <div id="jxgbox" class="jxgbox" style="width: 600px; height: 600px"></div>
+  <p></p>
+  <script>
+    'use strict';
+    JXG.Options.text.useMathJax = true;
+    var board = JXG.JSXGraph.initBoard('jxgbox', {
+      boundingbox: [-8, 8, 8, -10],
+      showFullscreen: true,
+      axis: false
+    }),
+      txtf, txtfx, txtfy, ffun, legendwidth, f3d, cf3 = [],
+      cf = [], gradf, gradfx, gradfy,
+      linevec, linegl1, cutCurve1, dir1, dir2, l1, l2, spoint1, spoint2,
+      gradc, gl1, gl2, gl1f, gl2f, s, niveauline = [], linegl1, linegl2,
+      niveaumin, niveaumax, niveaunum, niveauh, xlabel, ylabel,
+      /* compute niveaumin, niveaumax */
+      minx = -2,
+      miny = -2,
+      maxx = 2,
+      maxy = 2,
+      hx = 0.2,
+      hy = 0.2;
+    niveaumax = -100000;
+    niveaumin = 100000;
+    legendwidth = 0.5;
+    var inputFun = board.create("input", [-5, 7, "(x^2/2+y^2/2-y-x)*2/3", "f(x,y)="], {
+      cssStyle: "width: 150px",
+    });
+    var inputPlot = board.create("button", [1, 7, "Plot", function () { setFunction(); plot(); }], {
+      cssStyle: "width: 50px",
+    });
+
+    //'(x^2/2+y^2/2-y-x)*2/3
+    // cos(x)*sin(y)
+    /* direction where to show the h method */
+    linevec = [0.71, 0.71];
+    linevec = [1, 0];
+    niveaunum = 12;
+    spoint1 = [1, -1];
+
+    /* process question variables*/
+    s = board.create(
+      'slider',
+      [
+        [1, 5],
+        [4, 5],
+        [0, 3.9, 6.28]
+      ],
+      { name: 'rotate direction', snapWidth: 0.05, visible: true }
+    );
+
+    /* prepare 3D */
+    var box = [-2, 2];
+    var boxz = [-1, 4];
+    var view = board.create("view3d", [
+      [-6, -6],
+      [8, 8],
+      [box, box, boxz]
+    ], {
+      projection: 'parallel',
+      axesPosition: 'none',
+      xPlaneRear: {
+        visible: false
+      },
+      xPlaneRearYAxis: {
+        visible: false
+      },
+      xPlaneRearZAxis: {
+        visible: false
+      },
+      yPlaneRear: {
+        visible: false
+      },
+      yPlaneRearXAxis: {
+        visible: false
+      },
+      yPlaneRearZAxis: {
+        visible: false
+      },
+      infobox: { strokeOpacity: 0 }
+    });
+    view.az_slide.setValue(0.9);
+    view.el_slide.setValue(0.9);
+    xlabel = view.create('text3d', [box[1] * 1.1, 0.1, boxz[0], 'x']);
+    ylabel = view.create('text3d', [0.1, box[1] * 1.1, boxz[0], 'y']);
+
+    var buttonIso = board.create('button', [4, 4, '3D view', () => { view.az_slide.setValue(0.9); view.el_slide.setValue(0.9); }]);
+    var buttonXZ = board.create('button', [4, 3, 'xz-plane', () => { view.az_slide.setValue(3.14); view.el_slide.setValue(0.01); }]);
+    var buttonYZ = board.create('button', [4, 2, 'yz-plane', () => { view.az_slide.setValue(1.57); view.el_slide.setValue(0.01); }]);
+
+    setFunction();
+    plot();
+
+    function setFunction() {
+      txtf = inputFun.Value();
+      txtfx = board.jc.manipulate('D(' + txtf + ',x);');
+      txtfy = board.jc.manipulate('D(' + txtf + ',y);');
+      txtf = txtf.replace(/%pi/g, 'PI');
+      txtfx = txtfx.replace(/%pi/g, 'PI');
+      txtfy = txtfy.replace(/%pi/g, 'PI');
+
+      ffun = board.jc.snippet(txtf, true, 'x,y');
+      gradfx = board.jc.snippet(txtfx, true, 'x,y');
+      gradfy = board.jc.snippet(txtfy, true, 'x,y');
+
+      for (let xloop = minx; xloop < maxx; xloop += hx) {
+        for (let yloop = miny; yloop < maxy; yloop += hy) {
+          let fval = ffun(xloop, yloop);
+          if (niveaumax < fval) {
+            niveaumax = fval;
+          }
+          if (niveaumin > fval) {
+            niveaumin = fval;
+          }
+        }
+      }
+      niveauh = (niveaumax - niveaumin) / (niveaunum + 1);
+    }
+
+
+    function plot() {
+      board.removeObject([f3d, cf, dir1, dir2, gl1, gradf, gradc]);
+      f3d = view.create("functiongraph3d", [ffun, box, box], {
+        strokeWidth: 0.5,
+        stepU: 70,
+        stepsV: 70,
+        strokeOpacity: 0.5,
+        strokeColor: JXG.palette.skyblue
+      });
+      niveauline = [];
+      let niveaui;
+      for (let i = 0; i < niveaunum; i++) {
+        niveaui = niveaumin + i * niveauh;
+        niveauline.push(niveaui.toFixed(2));
+        cf.push(
+          board.create(
+            'implicitcurve',
+            [txtf + '-(' + niveaui.toFixed(2) + ')', txtfx, txtfy, [-2, 2], [-2, 2]],
+            {
+              strokeWidth: 2,
+              strokeColor: JXG.palette.red,
+              strokeOpacity: i / niveaunum,
+              needsRegularUpdate: false,
+              visible: false
+            }
+          )
+        );
+        cf3.push(view.create("curve3d", [[], [], []], {
+          name: i,
+          strokeWidth: 1,
+          strokeOpacity: ((6 + i) / (niveaunum + 5)) * 0.5,
+          strokeColor: '#000000'
+        }));
+
+        cf3[i].updateDataArray = function () {
+          let ipt, tloc;
+          var check, checklast = [NaN, NaN];
+          this.dataX = [];
+          this.dataY = [];
+          this.dataZ = [];
+          /* Einbau einer Logik, die den neuen Punkt in der dargestellten Box behält. Dazu müssen alle Koordinaten zusammen behandelt werden,
+          serielles Abarbeiten von X,Y,Z geht dann nicht */
+
+          for (ipt = 0; ipt < cf[this.name].numberPoints; ipt++) {
+            check = [cf[this.name].points[ipt].usrCoords[1], cf[this.name].points[ipt].usrCoords[2]];
+            if (isNaN(check[0])) { // auch nix zu tun, das update erfolgt unten
+            } else if (check[0] >= box[0] && check[0] <= box[1] && check[1] >= box[0] && check[1] <= box[1]) {
+              /* beide Koordinaten sind in der Box, nix zu tun*/
+            } else {
+              /* der Punkt ist kein NaN und liegt nicht in der Box. Nun gibt es folgende Fälle:
+                 der letzte Punkt ist NaN (z.B. beim ersten Punkt auf der Kurve) dann den nächsten Punkt nehmen
+                 ist der nächste Punkt auch NaN, wird der Punkt belassen
+                 Ein Fehlt noch: wenn zwei Boundigbox-Grenzen verletzt sind, Lösung: Kein else if, nur if?
+                 */
+              if (isNaN(checklast[0])) {
+                if (ipt < cf[this.name].numberPoints - 1) {
+                  checklast = [cf[this.name].points[ipt + 1].usrCoords[1], cf[this.name].points[ipt + 1].usrCoords[2]];
+                } else {
+                  checklast = check;
+                }
+                /* Der nächste Punkt könnte auch NaN sein, dann wird einfach aktuelle Punkt genommen */
+                if (isNaN(checklast[0])) {
+                  checklast = check;
+                }
+              }
+              /* So: Nun sollten check und checklast sinnvoll belegt sein und es wird fleißig interpoliert,
+                  wenn die Punkte nicht gleich sind*/
+              if (check[0] !== checklast[0] || check[1] !== checklast[1]) {
+                /* checklast wurde auf check gesetzt, nun wird der Punkt übernommen, sollte besser
+                auf Differenz mit Maschinengenauigkeit getestet werden.*/
+                /* wird erstmal nur abgefangen, Test ändern */
+                if (check[0] < box[0]) {
+                  /* Der Punkt ist nicht in der Box, Interpolation mit dem letzten Punkt
+                  y-Koordinate */
+                  if (check[0] !== checklast[0]) {
+                    tloc = (box[0] - checklast[0]) / (check[0] - checklast[0]);
+                    if (check[1] !== checklast[1]) {
+                      check[1] = checklast[1] + tloc * (check[1] - checklast[1]);
+                    }
+                  }
+                  check[0] = box[0];
+                }
+                if (check[0] > box[1]) {
+                  /* Der Punkt ist nicht in der Box, Interpolation mit dem letzten Punkt
+                  y-Koordinate */
+                  if (check[0] !== checklast[0]) {
+                    tloc = (box[1] - checklast[0]) / (check[0] - checklast[0]);
+                    if (check[1] !== checklast[1]) {
+                      check[1] = checklast[1] + tloc * (check[1] - checklast[1]);
+                    }
+                  }
+                  check[0] = box[1];
+                }
+                if (check[1] < box[0]) {
+                  /* Der Punkt ist nicht in der Box, Interpolation mit dem letzten Punkt
+                  x-Koordinate */
+                  if (check[1] !== checklast[1]) {
+                    tloc = (box[0] - checklast[1]) / (check[1] - checklast[1]);
+                    if (check[0] !== checklast[0]) {
+                      check[0] = checklast[0] + tloc * (check[0] - checklast[0]);
+                    }
+                  }
+                  check[1] = box[0];
+                }
+                if (check[1] > box[1]) {
+                  /* Der Punkt ist nicht in der Box, Interpolation mit dem letzten Punkt
+                  x-Koordinate */
+                  if (check[1] !== checklast[1]) {
+                    tloc = (box[1] - checklast[1]) / (check[1] - checklast[1]);
+                    if (check[0] !== checklast[0]) {
+                      check[0] = checklast[0] + tloc * (check[0] - checklast[0]);
+                    }
+                  }
+                  check[1] = box[1];
+                }
+              }
+            }
+            this.dataX.push(check[0]);
+            this.dataY.push(check[1]);
+            this.dataZ.push(boxz[0]);
+            checklast = check;
+          }
+        };
+      }
+      gl1 = view.create('point3d', [spoint1[0], spoint1[1], boxz[0]], {
+        name: "\\((x_0,y_0)\\)",
+        fillColor: JXG.palette.red,
+        //fixed: true,
+        label: { strokeColor: JXG.palette.red, fontSize: 20, anchorY: 'bottom' }
+      });
+
+      dir1 = view.create(
+        'line3d',
+        [
+          [() => (gl1.X() + linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value())),
+          () => (gl1.Y() - linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value())), boxz[0]],
+          [() => (gl1.X()),
+          () => (gl1.Y()), boxz[0]]
+        ],
+        {
+          firstArrow: true,
+          straightFirst: false, straightLast: false,
+          strokeColor: JXG.palette.blue,
+          strokeOpacity: 0.8,
+          strokeWidth: 3
+        }
+      );
+      dir2 = view.create(
+        'line3d',
+        [
+          [() => (gl1.X() + linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value())),
+          () => (gl1.Y() - linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value())), boxz[0]],
+          [() => (gl1.X() - linevec[0] * Math.cos(s.Value()) - linevec[1] * Math.sin(s.Value())),
+          () => (gl1.Y() + linevec[0] * Math.sin(s.Value()) - linevec[1] * Math.cos(s.Value())), boxz[0]]
+        ],
+        {
+          straightFirst: true, straightLast: true,
+          strokeColor: JXG.palette.blue,
+          strokeOpacity: 0.8,
+          strokeWidth: 1
+        }
+      );
+
+      gl2 = view.create('point3d', [spoint1[0] - linevec[0] * Math.cos(s.Value()), spoint1[1] - linevec[1] * Math.sin(s.Value()), boxz[0], dir2], {
+        name: "\\((x,y)\\)",
+        fillColor: JXG.palette.green,
+        //fixed: true,
+        label: { strokeColor: JXG.palette.green, fontSize: 20, anchorY: 'top' }
+      });
+
+      gl1f = view.create('point3d', [() => { return gl1.X(); }, () => { return gl1.Y(); }, () => { return ffun(gl1.X(), gl1.Y()); }], {
+        name: "\\((x_0,y_0,f(x_0,y_0))\\)",
+        fillColor: JXG.palette.red,
+        fixed: true,
+        label: { strokeColor: JXG.palette.red, fontSize: 20, anchorY: 'bottom' }
+      });
+      gl2f = view.create('point3d', [() => { return gl2.X(); }, () => { return gl2.Y(); }, () => { return ffun(gl2.X(), gl2.Y()); }], {
+        name: "\\((x,y,f(x,y))\\)",
+        fillColor: JXG.palette.green,
+        fixed: true,
+        label: { strokeColor: JXG.palette.green, fontSize: 20, anchorY: 'top' }
+      });
+      linegl1 = view.create('line3d', [gl1, gl1f], { strokeColor: JXG.palette.red, strokeOpacity: 0.3 });
+      linegl2 = view.create('line3d', [gl2, gl2f], { strokeColor: JXG.palette.green, strokeOpacity: 0.3 });
+      cutCurve1 = view.create('curve3d', [(t) => (gl1.X() + t * (linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value()))),
+      (t) => (gl1.Y() + t * (-linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value()))),
+      (t) => (ffun((gl1.X() + t * (linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value()))),
+        gl1.Y() + t * (-linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value())))), [-1, 1]], {
+        strokeWidth: 2,
+        stepU: 70,
+        stepsV: 70,
+        strokeOpacity: 0.5,
+        visible: true
+      });
+
+      l1 = view.create('line3d', [gl1f,
+        [() => (linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value())),
+        () => (-linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value())),
+        () => (gradfx(gl1f.X(), gl1f.Y()) * (linevec[0] * Math.cos(s.Value()) + linevec[1] * Math.sin(s.Value())) +
+          gradfy(gl1.X(), gl1.Y()) * (-linevec[0] * Math.sin(s.Value()) + linevec[1] * Math.cos(s.Value())))],
+        [-2, 2]
+      ], {
+        point1: {
+          visible: false
+        },
+        point2: {
+          visible: false
+        },
+        strokeColor: JXG.palette.red,
+        visible: true,
+        strokeWidth: 1.5,
+        strokeOpacity: 0.9
+      });
+      l2 = view.create('line3d', [gl1f, gl2f], {
+        point1: {
+          visible: false
+        },
+        point2: {
+          visible: false
+        },
+        strokeColor: JXG.palette.green,
+        straightFirst: true, straightLast: true,
+        visible: true,
+        strokeWidth: 2,
+        strokeOpacity: 0.9
+      });
+      board.update();
+    }
+
+  </script>
+</body>
+
+<footer>
+  Meike Akveld, ETH Zürich, Wigand Rathmann, FAU Erlangen-Nürnberg, CC-BY 4.0
+</footer>
+
+</html>
+
+<!-- Debugzeilen fuer STACk
+<p>f(x,y)={#objective#},h(x,y)={#constraint#}, (x_0,y_0,lambda)={#refval#}</p>
+<p>fx(x,y)={#objectivedx#},hx(x,y)={#constraintdx#}</p>
+<p>fy(x,y)={#objectivedy#},hy(x,y)={#constraintdy#}</p>
+-->
