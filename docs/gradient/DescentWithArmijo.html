@@ -1,0 +1,539 @@
+<head>
+  <title>Implicit plot</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8"
+    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0pt;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jxgframe" style="width: 75vw; height: 75vh">
+    <script>
+      var divid = "jxgframe";
+    </script>
+    <div id="jxgbox" class="jxgbox" style="width: 800px; height: 400px"></div>
+  </div>
+  <script type="text/javascript">
+    "use strict";
+    document.getElementById(divid).classList.remove("jxgbox"); /* Remove the default style. */
+    document.getElementById(divid).innerHTML = "<table style='width:98vw;height:98vh;'>" + "<tr><td><div id='box1'> </div></td><td><div id='box2'> </div></td></tr>" + "</table>";
+    for (let i = 1; JXG.Math.lt(i, 2 + 1); i++) {
+      let el = document.getElementById("box" + i);
+      el.classList.add("jxgbox");
+      /* You will have to do some random tuning of the margins and sizes as the default iframe might not have enough space. */
+      /*
+      el.style.width = "48vw";
+      el.style.height = "96vh";
+      */
+      el.style.width = "500px";
+      el.style.height = "500px";
+    }
+    JXG.Options.text.useMathJax = true;
+    var board = JXG.JSXGraph.initBoard("box1", {
+      boundingbox: [-2, 2, 2, -2],
+      axis: true,
+      keepaspectratio: true,
+      showFullscreen: false
+    }),
+      board2 = JXG.JSXGraph.initBoard("box2", {
+        boundingbox: [-8, 8, 8, -10],
+        keepaspectratio: true,
+        axis: false
+      }),
+      ffun, f3d, txtf, txtfx, txtfy, s, gradfx, gradfy, step1, step2, step3, step1f, step2f, step3f, gl1f,
+      step1fl, step2fl, step3fl, step1l3d, step1l3d, step2l3d, gl13d, step13d, step23d, inputf, buttonf,
+      txtfxx, txtfyx, txtfyy, hessfxx, hessfxxval, hessfyx, hessfyxval, hessfyy, hessyyval,
+      cf = [], direction, gl1, gl2, cutCurve, directionVec, gradf2, box, view, cf3, step3,
+      cl1, niveauline = [], niveaunum, niveaumax, niveaumin, niveauh, niveauopac, legend,
+      dirtype, seltext, seltype, buttonArmijo;
+    board.addChild(board2);
+
+    /* init variables */
+    niveauline = [-0.9, -0.5, 0, 0.5, 0.9];
+
+    niveaunum = 7;
+    txtf = "(x*x+y*y)**2-2*x*y-1";
+
+    /*
+    txtf = "cos(2*x)*sin(2*y)";
+    txtf = "x*x/3+y*y/3+x*y/2-2";
+    txtf = "1*x*x+y*y+x*y/2";
+    txtf = "cos(2*x)*cos(2*y)";
+    txtf = "sin(x)*cos(2*y)";
+    txtf = "10*x*x+y*y-2*x*y-x-2*y";
+    txtf = "(1-x)^2 + 10*(y-x^2)^2"*/
+
+    /*txtf = '{#f#}';*/
+
+    /*
+    s = board.create("slider", [
+      [-1, 1.6],
+      [1, 1.6],
+      [0, 0.2, 1]
+    ], {
+      name: "damping",
+      snapWidth: 0.05,
+      point1: {
+        frozen: true
+      },
+      point2: {
+        frozen: true
+      }
+    });
+    */
+    /* create type selector */
+    dirtype = board.create('text', [-1, 1.8, '<select id="dirtype">' +
+      '<option value="sd" selected> steepest decent' +
+      '<option value="pj" > steepest decent with Jacobi prec' +
+      '<option value="exact"> step size' +
+      '<option value="newton"> Newton' +
+      '</select>'], { fixed: true });
+    seltext = board.create('text', [-1.8, 1.8, 'search direction']);
+    seltype = document.querySelector('#dirtype');
+    seltype.addEventListener("change", function () {
+      plotIterates();
+      board.update();
+    });
+    inputf = board.create("input", [-1.8, -1.8, txtf, "f(x)="], {
+      cssStyle: "width: 150px",
+      fixed: true
+    });
+    buttonf = board.create("button", [-0.3, -1.8, 'Apply', () => {
+      setObjective();
+      plotFun();
+      plotIterates();
+    }
+    ]);
+    buttonArmijo = board.create("checkbox", [0.5, -1.8, 'Armijo on/off', () => {
+      fArmijo = !(fArmijo)
+      plotIterates();
+    }
+    ], { frozen: true });
+
+    /* prepare 3D */
+    box = [-2, 2];
+    view = board2.create("view3d", [
+      [-6, -6],
+      [8, 8],
+      [box, box, box]
+    ], {
+      projection: 'parallel',
+      axesPosition: 'none',
+      xPlaneRear: {
+        visible: false
+      },
+      xPlaneRearYAxis: {
+        visible: false
+      },
+      xPlaneRearZAxis: {
+        visible: false
+      },
+      yPlaneRear: {
+        visible: false
+      },
+      yPlaneRearXAxis: {
+        visible: false
+      },
+      yPlaneRearZAxis: {
+        visible: false
+      }
+    });
+    view.az_slide.setValue(3.4);
+    view.el_slide.setValue(1.1);
+
+
+    board.suspendUpdate();
+    setObjective();
+    plotFun();
+    plotIterates();
+    board.unsuspendUpdate();
+
+    function plotFun() {
+      var i;
+      board.removeObject([gl1, cf, niveauopac, cutCurve]);
+      board2.removeObject([cf3, f3d]);
+      /* let i = 1; i <= niveaunum; i++*/
+      niveauline = [];
+      niveauopac = [];
+      cf = []; cf3 = [];
+      for (i = 0; JXG.Math.lt(i, niveaunum); i++) {
+        let niveaui = niveaumin + (i + 1) * niveauh;
+        niveauline.push(niveaui.toFixed(2));
+        niveauopac.push(((6 + i) / (niveaunum + 5)) * 0.5);
+        cf.push(board.create("implicitcurve", [
+          txtf + "-(" + niveaui.toFixed(2) + ")", txtfx, txtfy, [-2, 2],
+          [-2, 2]
+        ], {
+          strokeWidth: 2,
+          strokeColor: '#000000', /*JXG.palette.black*/
+          highlightStrokeColor: '#000000', /*JXG.palette.black*/
+          highlightStrokeOpacity: niveauopac[i],
+          strokeOpacity: niveauopac[i],
+          needsRegularUpdate: false,
+          name: "niveau"
+        }));
+        /* name wird genutzt, im den Index im curve3D array wieder zu finden*/
+        cf3.push(view.create("curve3d", [[], [], []], {
+          name: i,
+          strokeWidth: 1,
+          strokeOpacity: niveauopac[i],
+          strokeColor: '#000000'/*JXG.palette.red,*/
+        }));
+        cf3[i].updateDataArray = function () {
+          let ipt, tloc;
+          var check, checklast = [NaN, NaN];
+          this.dataX = [];
+          this.dataY = [];
+          this.dataZ = [];
+          /* Einbau einer Logik, die den neuen Punkt in der dargestellten Box behält. Dazu müssen alle Koordinaten zusammen behandelt werden,
+          serielles Abarbeiten von X,Y,Z geht dann nicht */
+          for (ipt = 0; ipt < cf[this.name].numberPoints; ipt++) {
+            check = [cf[this.name].points[ipt].usrCoords[1], cf[this.name].points[ipt].usrCoords[2]];
+            this.dataX.push(check[0]);
+            this.dataY.push(check[1]);
+            this.dataZ.push(box[0]);
+            //checklast = check;
+          }
+        };
+      }
+
+      f3d = view.create("functiongraph3d", [ffun, box, box], {
+        strokeWidth: 0.5,
+        stepU: 70,
+        stepsV: 70,
+        strokeOpacity: 0.85,
+        strokeColor: JXG.palette.skyblue
+      });
+      gl1 = board.create("point", [1, 1], {
+        name: "\\((x_0,y_0)\\)",
+        label: { strokeColor: JXG.palette.red, fontSize: 20 }
+      });
+
+      board.update();
+    };
+    function plotIterates() {
+      var i;
+      if (step1 !== undefined) { board.removeObject([step1.point1, step1.point2]); }
+      if (step2 !== undefined) { board.removeObject([step2.point1, step2.point2]); }
+      if (step3 !== undefined) { board.removeObject([step3.point1, step3.point2]); }
+      board.removeObject([step1, step2, step3, cl1, step1fl, step2fl, step3fl]);
+      board2.removeObject([gl1f, step1f, step2f, step13d, step23d, step1l3d, step2l3d]);
+      /* let i = 1; i <= niveaunum; i++*/
+      step1 = board.create("arrow", [
+        function () {
+          return [gl1.X(), gl1.Y()];
+        },
+        function () {
+          let updateDir = getArmijoDir(gl1);
+          return [gl1.X() + updateDir[0],
+          gl1.Y() + updateDir[1]];
+        }
+      ], {
+        strokeColor: JXG.palette.red,
+        point2: {
+          visible: true,
+          size: 0,
+          withLabel: true,
+          //          name: "\\(-\\nabla f(x_0)\\)",
+          name: "\\((x_1,y_1)\\)",
+          label: { strokeColor: JXG.palette.red, fontSize: 20 }
+        }
+      });
+      step2 = board.create("arrow", [
+        function () {
+          return [step1.point2.X(), step1.point2.Y()];
+        },
+        function () {
+          let updateDir = getArmijoDir(step1.point2);
+          return [step1.point2.X() + updateDir[0],
+          step1.point2.Y() + updateDir[1]];
+        }
+      ], {
+        strokeColor: JXG.palette.red,
+        point2: {
+          visible: true,
+          size: 0,
+          withLabel: true,
+          //          name: "\\(-\\nabla f(x_1)\\)",
+          name: "\\((x_2,y_2)\\)",
+          label: { strokeColor: JXG.palette.red, fontSize: 20 }
+        }
+      });
+      step3 = board.create("arrow", [
+
+        function () {
+          return [step2.point2.X(), step2.point2.Y()];
+        },
+        function () {
+          let updateDir = getArmijoDir(step2.point2);
+          return [step2.point2.X() + updateDir[0],
+          step2.point2.Y() + updateDir[1]];
+        }
+      ],
+        {
+          strokeColor: JXG.palette.red,
+          point2: {
+            visible: true,
+            size: 0,
+            withLabel: true,
+            //          name: "\\(-\\nabla f(x_1)\\)",
+            name: "\\((x_3,y_3)\\)",
+            label: { strokeColor: JXG.palette.red, fontSize: 20 }
+          }
+        });
+      gl1f = view.create('point3d', [() => gl1.X(), () => gl1.Y(), () => ffun(gl1.X(), gl1.Y())],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\((x_0,y_0,f(x_0,y_0))\\)',
+          label: { strokeColor: JXG.palette.red }
+        });
+      step1f = view.create('point3d', [() => step1.point2.X(), () => step1.point2.Y(), () => ffun(step1.point2.X(), step1.point2.Y())],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\((x_1,y_1,f(x_1,y_1))\\)',
+          label: { strokeColor: JXG.palette.red }
+        });
+      step2f = view.create('point3d', [() => step2.point2.X(), () => step2.point2.Y(), () => ffun(step2.point2.X(), step2.point2.Y())],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\((x_2,y_2,f(x_2,y_2))\\)',
+          label: { strokeColor: JXG.palette.red }
+        });
+      step3f = view.create('point3d', [() => step3.point2.X(), () => step3.point2.Y(), () => ffun(step3.point2.X(), step3.point2.Y())],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\((x_3,y_3,f(x_3,y_3))\\)',
+          label: { strokeColor: JXG.palette.red }
+        });
+      step1fl = view.create('line3d', [gl1f, step1f], {
+        strokeColor: JXG.palette.red,
+        strokeWidth: 1.5,
+        lastArrow: true
+      });
+      step2fl = view.create('line3d', [step1f, step2f], {
+        strokeColor: JXG.palette.red,
+        strokeWidth: 1.5,
+        lastArrow: true
+      });
+      step3fl = view.create('line3d', [step2f, step3f], {
+        clip: false, 
+        strokeColor: JXG.palette.red,
+        strokeWidth: 1.5,
+        lastArrow: true
+      });
+      /*
+      gl13d = view.create('point3d', [() => gl1.X(), () => gl1.Y(), () => box[0]],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\(f(x_0)\\)',
+          strokeColor: JXG.palette.red,
+          label: { strokeColor: JXG.palette.red },
+          visible: false
+        });
+      step13d = view.create('point3d', [() => step1.point2.X(), () => step1.point2.Y(), () => box[0]],
+        {
+          fillColor: JXG.palette.red,
+          name: '\\(x_1\\)',
+          strokeColor: JXG.palette.red,
+          label: { strokeColor: JXG.palette.red },
+          visible: false
+        });
+      step23d = view.create('point3d', [() => step2.point2.X(), () => step2.point2.Y(), () => box[0]],
+        {
+          fillColor: JXG.palette.red,
+          strokeColor: JXG.palette.red,
+          name: '\\(x_2\\)',
+          label: { strokeColor: JXG.palette.red },
+          visible: false
+        });
+      step1l3d = view.create('line3d', [gl13d, step13d], {
+        strokeColor: JXG.palette.red,
+        strokeWidth: 1.5,
+        lastArrow: true,
+        visible: false
+      });
+      step2l3d = view.create('line3d', [step13d, step23d], {
+        strokeColor: JXG.palette.red,
+        strokeWidth: 1.5,
+        lastArrow: true,
+        visible: false
+      });
+        */
+      board.update();
+    }
+
+    function setObjective() {
+      txtf = inputf.Value();
+      ffun = board.jc.snippet(txtf, true, "x,y");
+      txtfx = board.jc.manipulate("D(" + txtf + ",x);");
+      txtfy = board.jc.manipulate("D(" + txtf + ",y);");
+      txtfxx = board.jc.manipulate("D(" + txtfx + ",x);");
+      txtfyx = board.jc.manipulate("D(" + txtfy + ",x);");
+      txtfyy = board.jc.manipulate("D(" + txtfy + ",y);");
+      gradfx = board.jc.snippet(txtfx, true, "x,y");
+      gradfy = board.jc.snippet(txtfy, true, "x,y");
+      hessfxx = board.jc.snippet(txtfxx, true, "x,y");
+      hessfyx = board.jc.snippet(txtfyx, true, "x,y");
+      hessfyy = board.jc.snippet(txtfyy, true, "x,y");
+      /* compute niveaumin, niveaumax */
+      var minx = -2,
+        miny = -2,
+        maxx = 2,
+        maxy = 2,
+        hx = 0.2,
+        hy = 0.2;
+      niveaumax = -100000;
+      niveaumin = 100000;
+      for (let xloop = minx; xloop < maxx; xloop += hx) {
+        for (let yloop = miny; yloop < maxy; yloop += hy) {
+          let fval = ffun(xloop, yloop);
+          if (niveaumax < fval) {
+            niveaumax = fval;
+          }
+          if (niveaumin > fval) {
+            niveaumin = fval;
+          }
+        }
+      }
+      niveauh = (niveaumax - niveaumin) / (niveaunum + 1);
+    }
+    function getDirection(point) {
+      let dirxret, diryret;
+      /* umbau auf case */
+      if (seltype.value === 'newton') {
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let detHf = hessfxxval * hessfyyval - hessfyxval * hessfyxval;
+        /*Regularisierung für H_f*/
+        if (Math.abs(detHf) < 0.001) { detHf = Math.sign(0.001) };
+        dirxret = -(hessfyyval * gradfx(point.X(), point.Y()) - hessfyxval * gradfy(point.X(), point.Y())) / detHf;
+        diryret = -(- hessfyxval * gradfx(point.X(), point.Y()) + hessfxxval * gradfy(point.X(), point.Y())) / detHf;
+      };
+
+      if (seltype.value === 'exact') {
+        let gradfxval = gradfx(point.X(), point.Y());
+        let gradfyval = gradfy(point.X(), point.Y());
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let retval = (gradfxval * gradfxval + gradfyval * gradfyval) / (hessfxxval * gradfxval * gradfxval + hessfyyval * gradfyval * gradfyval
+          + 2 * hessfyxval * gradfyval * gradfxval);
+        dirxret = -retval * gradfxval;
+        diryret = -retval * gradfyval;
+      };
+      if (seltype.value === 'pj') {
+        let hessfxxval = hessfyy(point.X(), point.Y());
+        if (Math.abs(hessfxxval) < 0.001) { hessfxxval = Math.sign(0.001) };
+        dirxret = (-gradfx(point.X(), point.Y()) / hessfxxval);
+        diryret = (-gradfy(point.X(), point.Y()) / hessfxxval);
+      };
+      if (seltype.value === 'sd') {
+        dirxret = (-gradfx(point.X(), point.Y()));
+        diryret = (-gradfy(point.X(), point.Y()));
+      }
+      return [dirxret, diryret];
+    }
+
+    function getDirectionx(point) {
+      if (seltype.value === 'newton') {
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let detHf = hessfxxval * hessfyyval - hessfyxval * hessfyxval;
+        if (Math.abs(detHf) < 0.001) { detHf = Math.sign(0.001) };
+        return (hessfyyval * gradfx(point.X(), point.Y()) - hessfyxval * gradfy(point.X(), point.Y())) / detHf;
+      };
+      if (seltype.value === 'exact') {
+        let gradfxval = gradfx(point.X(), point.Y());
+        let gradfyval = gradfy(point.X(), point.Y());
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let retval = (gradfxval * gradfxval + gradfyval * gradfyval) / (hessfxxval * gradfxval * gradfxval + hessfyyval * gradfyval * gradfyval
+          + 2 * hessfyxval * gradfyval * gradfxval);
+        return retval * gradfxval;
+      };
+      if (seltype.value === 'pj') {
+        let hessfxxval = hessfyy(point.X(), point.Y());
+        if (Math.abs(hessfxxval) < 0.001) { hessfxxval = Math.sign(0.001) };
+        return (-gradfx(point.X(), point.Y()) / hessfxxval);
+      };
+      if (seltype.value === 'sd') {
+        return (-gradfx(point.X(), point.Y()));
+      }
+      return 0;
+    }
+    function getDirectiony(point) {
+      if (seltype.value === 'newton') {
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let detHf = hessfxxval * hessfyyval - hessfyxval * hessfyxval;
+        if (Math.abs(detHf) < 0.001) { detHf = Math.sign(0.001) };
+        return (- hessfyxval * gradfx(point.X(), point.Y()) + hessfxxval * gradfy(point.X(), point.Y())) / detHf;
+      };
+      if (seltype.value === 'exact') {
+        let gradfxval = gradfx(point.X(), point.Y());
+        let gradfyval = gradfy(point.X(), point.Y());
+        let hessfxxval = hessfxx(point.X(), point.Y());
+        let hessfyxval = hessfyx(point.X(), point.Y());
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        let retval = (gradfxval * gradfxval + gradfyval * gradfyval) / (hessfxxval * gradfxval * gradfxval + hessfyyval * gradfyval * gradfyval
+          + 2 * hessfyxval * gradfyval * gradfxval
+        );
+        return retval * gradfyval;
+      };
+      if (seltype.value === 'sd') {
+        return (-gradfy(point.X(), point.Y()));
+      };
+      if (seltype.value === 'pj') {
+        let hessfyyval = hessfyy(point.X(), point.Y());
+        if (Math.abs(hessfyyval) < 0.001) { hessfyyval = Math.sign(0.001) };
+        return (-gradfy(point.X(), point.Y()) / hessfyyval);
+      };
+      return 0;
+    }
+    function getArmijoDir(point) {
+
+      let fval = ffun(point.X(), point.Y());
+      let gradxpoint = gradfx(point.X(), point.Y());
+      let gradypoint = gradfx(point.X(), point.Y());
+      let stepSize = 1;
+      let directionX = [], directionY = [];
+      [directionX, directionY] = getDirection(point);
+
+      /* Armijo */
+      if (buttonArmijo.Value()) {
+        let gamma = 0.01; // damping rate
+        let beta = 0.5;   // reduction rate step size
+
+        let ddd = gamma * (gradxpoint * directionX + gradypoint * directionY) // damped directional derivatives
+
+        let fvalplus = ffun(point.X() + directionX, point.Y() + directionY);
+
+        while (fvalplus > fval + stepSize * ddd) {
+          stepSize *= beta;
+          fvalplus = ffun(point.X() + stepSize * directionX, point.Y() + stepSize * directionY);
+        }
+      }
+
+      return [directionX * stepSize, directionY * stepSize];
+    }
+    /*
+    function getDirectionx(point) {
+    }
+    function getDirectiony(point) {
+      return gradfy(point.X(), point.Y());
+    }
+    */
+  </script>
+</body>

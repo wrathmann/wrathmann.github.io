@@ -24,4 +24,7 @@ The ideas where shown in the talk of Meike Akveld and Wigand Rathmann at the Int
 
 Here more examples demonstrating derivatives will be found here.
 
+## Optimization
+- [Descent methods with Armijo strategy](./DescentWithArmijo.html)
+- [Objective along search direction](./ObjectiveAlongSearchDir.html)
 - [Grandient and constraints](./Implicit-lagrange.html) to demonstrate the idea of Karush-Kuhn-Tucker points

@@ -128,7 +128,9 @@
       });
       cl1 = board.create("circle", [gl1, () => radius.Value()]);
       gl2 = board.create("glider", [gl1.X() + 1, gl1.Y(), cl1], {
-        name: "direction",
+        name: "\\(D_{\\vec{v}}\\)",
+        fillColor:JXG.palette.blue,
+        strokeColor:JXG.palette.blue,
         label: { strokeColor: JXG.palette.blue, fontSize: 20 }
       });
       directionVec = [() => ((gl2.X() - gl1.X()) / radius.Value()), () => ((gl2.Y() - gl1.Y()) / radius.Value())];
@@ -196,3 +198,7 @@
   </script>
 
 </body>
+
+ <footer>Meike Akveld, ETH Zürich; Wigand Rathmann, FAU, 
+    <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>
+</footer>
