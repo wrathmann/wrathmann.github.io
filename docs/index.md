@@ -11,7 +11,8 @@ theme: minima
 # JSXGraph Example collection
 
 ## Calculus (univariate)
-
+- [limits of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Grenzwerte.html) 
+- [continuity of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Folgenstetigkeit.html) 
 - [Sequences in 1d (version 2)](./JSXGraphExamples/ConvergenceSequencesR1EpsV2.html) 
 - [Power series (sine, German)](./JSXGraphExamples/PotenzreiheSinus.html) 
 - [Power series (1/x, German)](./JSXGraphExamples/PotenzreiheMitZentrum.html) 
@@ -98,9 +99,6 @@ The links will direct to the IDIAM page.
 ## Calculus 1d
 + [Sequences in 1d](https://idiamath.github.io/JSXGraphExamples/ConvergenceSequencesEps.html) 
 + [Sequences in 1d (version 2)](https://wrathmann.github.io/JSXGraphExamples/KonvergenzFolgenEpsV2.html) 
-+ [limits of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Grenzwerte.html) 
-+ [continuity of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Folgenstetigkeit.html) 
-
 + [$$\epsilon-\delta$$-criterion for continuous functions](https://idiamath.github.io/JSXGraphExamples/Functions-e-d-continuity.html)
 + [Uniform continuity of functions](https://idiamath.github.io/JSXGraphExamples/Functions-uniform-continuity.html)
 + [Definition of Area functions](https://idiamath.github.io/JSXGraphExamples/FunctionsHyperbola.html) The idea of the area function is shown.
