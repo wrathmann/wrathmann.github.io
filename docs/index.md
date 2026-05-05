@@ -75,7 +75,7 @@ In the following examples one can highlight probalities $P(a<=X<=b)$.
 
 ## Interactive Digital Assessement in Mathematics
 
-The following applets were supported by the ERASMUS+ project IDIAM KA-226. At [idamath.github.io](idamath.github.io) one will find STACK questions as well. 
+The following applets were supported by the ERASMUS+ project IDIAM KA-226. At [idamath.github.io](https://idiamath.github.io) one will find STACK questions as well. 
 The links will direct to the IDIAM page.
 ## Complex Numbers
 + [Complex numbers (polar coordinates)](https://idiamath.github.io/JSXGraphExamples/ComplexNumberPolar.html) 
