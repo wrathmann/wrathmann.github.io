@@ -20,9 +20,9 @@ These file are part of the talk [How a Boat Rotates in a River: Visualizing Rota
 
 [Vectorfield and curl](./02-vectorfield-plot-input-curl-on-curve.html)
 
-[Vectorfield and rotation angle along given curve](./03-vectorfield-plot-input-rotation-along-curve.html)
+[Vectorfield and rotational angle along given curve](./03-vectorfield-plot-input-rotation-along-curve.html)
 
-[Vectorfiel and rotational angle along trajectory](./04-Vektorfelder-mitRotation.html)
+[Vectorfield and rotational angle along trajectory](./04-Vektorfelder-mitRotation.html)
 
-[Let the boat ...](./05-vectofield-with-boat.html)
+[Let the boat drift](./05-vectofield-with-boat.html)
 
