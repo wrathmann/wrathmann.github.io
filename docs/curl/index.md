@@ -14,7 +14,7 @@ theme: minia
 
 If a vector field $V$ is interpreted as a velocity field, the curl can be read as the rotation around the axis given by $\nabla\times V$
 
-These file were demonstrated at the JSXGraph Conference 2025
+These file are part of the talk [How a Boat Rotates in a River: Visualizing Rotation in Flow Fields](https://jsxgraph.org/conf2025/program/rathmann) ([recording](https://youtu.be/AJmkuQQdzGA?si=okeYFUZ-Vy9PQZBz)) at the [JSXGraph Conference 2025](https://jsxgraph.org/conf2025/).
 
 [Degrees of freedom](./01-3dofs-of-a-point.html)
 
