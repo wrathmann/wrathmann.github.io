@@ -1,0 +1,323 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    #jxgbox {
+      width: 500px;
+      height: 500px;
+      margin: 20px auto;
+    }
+
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Rotation along a Trajectory</title>
+</head>
+
+<body>
+
+  <h1>Rotation along a Trajectory</h1>
+
+
+  <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;"></div>
+  <center>
+    <button onclick="toggleList([inputfx,inputfy,s,o,curveN,curveh]);
+                         toggleList([bFieldS,bFieldT,bTraject]);">
+      Toggle Deco</button> &nbsp;
+    <button onclick="toggleList([angle,bPhi,bPhiDot]);">Toggle Angle</button> &nbsp;
+    <button onclick="toggleList([p[2],p2[2]]);toggleList(polygon);toggleList(polygon2);">
+      Toggle Coord Sys</button> &nbsp;
+  </center>
+  <br clear="all">
+  <script language="JavaScript">
+    "use strict";
+    JXG.Options.text.useMathJax = true;
+    var jxgbox = document.getElementById('jxgbox');
+
+    var s, o;
+    var board, point;
+    var f, fx, fy, ftxt, field = [], phiDotFun, phiDottxt;
+    var inputfx, inputfy;
+    var curveN, curveh, curveC, curveG, data = [], datat = [], curvet;
+    var polygon, polygon2, p2, p, deltax, deltay, angle;
+    var splineX, splineY, splineXdd, splineYdd, tmax, phiDott = [], phit = [], phitdd = [];
+    var bFieldT, bFieldS, bTraject, bPhi, bPhiDot, phiDotFlag;
+    var transrot, bEx1, bEx2, bEx3, bEx4;
+
+    deltax = 1;
+    deltay = 1;
+
+    var init = function () {
+      board = JXG.JSXGraph.initBoard(jxgbox, {
+        axis: true,
+        boundingbox: [-5, 5, 5, -5]
+      });
+      //inputfx = board.create('input', [-4.1, 4.5, 'cos(y)', 'f_1(x,y)=']);
+      inputfx = board.create('input', [-4.1, 4.5, 'abs(x)-y', '\\(V_x(x,y)=\\)']);
+      inputfy = board.create('input', [-4.1, 4.1, 'sin(x)', '\\(V_y(x,y)=\\)']);
+      s = board.create('slider', [
+        [1.1, 4.7],
+        [3.1, 4.7],
+        [0, 0.5, 1]
+      ], {
+        name: 'length'
+      });
+      o = board.create('slider', [
+        [1.1, 4.3],
+        [3.1, 4.3],
+        [0, 0.25, 1]
+      ], {
+        name: 'opacity'
+      });
+
+      // trajectory
+      point = board.create('point', [-3, 2], { name: '\\((x_0,y_0)\\)', color: 'red' });
+      curveN = board.create('slider', [
+        [1.1, 3.9],
+        [3.1, 3.9],
+        [20, 100, 200]
+      ], {
+        name: 'N', snapWidth: 1
+      });
+      curveh = board.create('slider', [
+        [1.1, 3.5],
+        [3.1, 3.5],
+        [0.05, 0.1, 0.8]
+      ], {
+        name: 'h', snapWidth: 0.05
+      });
+      curvet = board.create('slider', [
+        [1.1, -3.5],
+        [3.1, -3.5],
+        [0, 0.25, 1]
+      ], {
+        name: 't', snapWidth: 0.01
+      });
+      bFieldT = board.create('button', [-4.1, -3.7, "vector field",
+      function () { toggleList([field]); }
+  ],
+        { fixed: true }
+      );
+
+      bFieldS = board.create(
+        "button",
+        [-4.1, 3.5, "set vector field",
+        function () { plot(); }
+    ],
+        { fixed: true }
+      );
+      bTraject = board.create("button", [-4.1, -4.1, "trajectory",
+      function () { toggleList([curveC, point]); }
+  ],
+        { fixed: true }
+      );
+      bPhi = board.create("button", [-4.1, -4.5, "\\(\\varphi\\)", function () { phiDotFlag = false; createGlider(); }],
+        { fixed: true }
+      );
+      bPhiDot = board.create("button", [-3.5, -4.5, "\\(\\dot\\varphi\\)", function () { phiDotFlag = true; createGlider(); }],
+        { fixed: true }
+      );
+      bEx1 = board.create("button", [-4.1, -4.5, "Example 1",
+      function () { inputfx.set('-y'); inputfy.set('x'); plot(); }
+  ],
+        { fixed: true }
+      );
+      bEx2 = board.create("button", [-2.5, -4.5, "Example 2",
+      function () { inputfx.set('-y/(x^2+y^2)'); inputfy.set('x/(x^2+y^2)'); plot(); }
+  ],
+        { fixed: true }
+      );
+      bEx3 = board.create("button", [-0.9, -4.5, "Example 3",
+      function () { inputfx.set('-y/sqrt(x^2+y^2)'); inputfy.set('x/sqrt(x^2+y^2)'); plot(); }
+  ],
+        { fixed: true }
+      );
+      bEx4 = board.create("button", [0.7, -4.5, "Example 4",
+        function () { inputfx.set('abs(x)-y'); inputfy.set('sin(x)'); plot(); }
+  ],
+        { fixed: true }
+      );
+
+      /*Events
+      */
+      curveh.on("down", (e) => (curvet.setAttribute({ visible: false }), curveG.setAttribute({ visible: false })));
+      curveh.on("up", (e) => createGlider());
+      curveN.on("down", (e) => (curvet.setAttribute({ visible: false }), curveG.setAttribute({ visible: false })));
+      curveN.on("up", (e) => createGlider());
+      point.on("down", (e) => (
+        curvet.setAttribute({ visible: false }),
+        curveG.setAttribute({ visible: false }),
+        toggleList([p[2], p2[2], angle]), toggleList(polygon), toggleList(polygon2)));
+      point.on("up", (e) => createGlider());
+    };
+
+    var plot = function () {
+
+      board.removeObject([field, curveG, curveC, p, p2, transrot]);
+      fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
+      fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
+      /* generate function for \dot \phi(t)*/
+      let fxdytxt = board.jc.manipulate(("D(" + inputfx.Value() + ",y);"));
+      let fydxtxt = board.jc.manipulate(("D(" + inputfy.Value() + ",x);"));
+      phiDottxt = "(" + fydxtxt + "-(" + fxdytxt + "))/2";
+      // generate ODE
+      ftxt = '[' + inputfx.Value() + ','
+        + inputfy.Value() + ','
+        + phiDottxt + ']';
+      ftxt = ftxt.replace(/x/g, "x[0]");
+      ftxt = ftxt.replace(/y/g, "x[1]");
+
+      // generatet function used in Numerics.rungeKutta
+      f = board.jc.snippet(ftxt, true, 't,x');
+
+      field = board.create('vectorfield', [
+        [fx, fy],
+        [-4, 20, 4],
+        [-4, 20, 4]], {
+        strokeWidth: 1.5,
+        highlightStrokeWidth: 0.5,
+        strokeColor: JXG.palette.red,
+        strokeOpacity: () => o.Value(),
+        highlightstrokeOpacity: () => o.Value(),
+        highlightStrokeColor: JXG.palette.red,
+        scale: () => s.Value(),
+        arrowHead: {
+          enabled: true,
+          size: 8,
+          angle: Math.PI / 16
+        },
+        visible: true
+      });
+      curveC = board.create('curve', [[], []], { strokeWidth: 3 });
+      curveC.updateDataArray = function () {
+        // remove point on "shadow" curve
+        // removeGlider();
+        this.dataX = [];
+        this.dataY = [];
+        var h = curveh.Value();
+        var N = curveN.Value();
+        tmax = h * N;
+        data = JXG.Math.Numerics.rungeKutta('rk4',
+          [point.X(), point.Y(), 0],
+          [0, h * N], N, f);
+        for (var i = 0; i < curveN.Value(); i++) {
+          this.dataX[i] = data[i][0];
+          this.dataY[i] = data[i][1];
+        }
+      };
+      // der Punkt auf der Trajektorie muss neu konstruiert werden
+      // das passiert aber nur, bei bestimmten Events, damit es nicht ständig neu generiert wird.
+      createGlider();
+
+    };
+
+    init();
+    plot();
+
+    function createGlider() {
+      board.removeObject([curveG, p, p2, polygon, polygon2]);
+      phiDotFun = board.jc.snippet(phiDottxt, true, "x,y");
+
+      // build spline form RK result
+      // build t vector
+      datat = [];
+      splineX = [];
+      splineXdd = [];
+      splineY = [];
+      splineYdd = [];
+      phiDott = [];
+      phit = [];
+      phitdd = [];
+      // t vector
+      datat = data.map(function (v, i) { return i * curveh.Value(); });
+      // x and y coordinates
+      splineX = data.map(function (v) { return v[0]; });
+      splineY = data.map(function (v) { return v[1]; });
+      // vector with angular velocity
+      phiDott = data.map(function (v) { return phiDotFun(v[0], v[1]); });
+      phit = data.map(function (v) { return v[2]; });
+      // accumulate the angle by trapeziodal rule
+      phit[0] = 0;
+      /*
+      for (let iloop = 0; iloop < datat.length - 1; iloop++) {
+        phit.push(phit[iloop] + curveh.Value() * (phiDott[iloop] + phiDott[iloop + 1]) / 2);
+      }
+    
+      */
+      // build now the splines
+      splineXdd = JXG.Math.Numerics.splineDef(datat, splineX);
+      splineYdd = JXG.Math.Numerics.splineDef(datat, splineY);
+      phitdd = JXG.Math.Numerics.splineDef(datat, phit);
+
+      curveG = board.create("point", [
+        () => (JXG.Math.Numerics.splineEval(curvet.Value() * tmax, datat, splineX, splineXdd)),
+        () => (JXG.Math.Numerics.splineEval(curvet.Value() * tmax, datat, splineY, splineYdd))],
+        { name: '\\((x,y)\\)' });
+      curvet.setAttribute({ visible: true });
+      board.removeObject([polygon, polygon2, p2, p, transrot, angle]);
+      if (phiDotFlag) {
+        transrot = board.create('transform', [() => (phiDotFun(curveG.X(), curveG.Y())), curveG], { type: 'rotate' });
+      } else {
+        transrot = board.create('transform', [() => (JXG.Math.Numerics.splineEval(curvet.Value() * tmax, datat, phit, phitdd)), curveG], { type: 'rotate' });
+      }
+      // define box around the curveG
+      p = [];
+      p.push(board.create("point", [() => curveG.X(), () => curveG.Y() - deltay],
+        { visible: false, label: { visible: false } }));
+      p.push(board.create("point", [() => curveG.X(), () => curveG.Y() + deltay], { visible: false }));
+      p.push(board.create("point", [() => curveG.X() + deltax, () => curveG.Y()], { visible: true, strokeOpacity: 0.1, name: '' }));
+      p.push(board.create("point", [() => curveG.X() - deltax, () => curveG.Y()], { visible: false }));
+      // define rotating box
+      p2 = [];
+      p.forEach(
+        (ploc) => p2.push(board.create("point", [ploc, transrot],
+          { strokeColor: JXG.palette.blue, fillColor: JXG.palette.blue, visible: false }))
+      );
+      p2[2].setAttribute({ visible: true, label: { visible: false } });
+
+      polygon = [];
+      polygon.push(board.create("line", [p[0], p[1]], { strokeOpacity: 0.3, straightFirst: false, straightLast: false }));
+      polygon.push(board.create("line", [p[2], p[3]], { strokeOpacity: 0.3, straightFirst: false, straightLast: false }));
+      polygon2 = [];
+      polygon2.push(board.create("line", [p2[0], p2[1]], { straightFirst: false, straightLast: false }));
+      polygon2.push(board.create("line", [p2[2], p2[3]], { straightFirst: false, straightLast: false }));
+      angle = board.create('angle', [p[2], curveG, p2[2]], {
+        radius: deltax * 0.75,
+        name: phiDotFlag ? '\\(\\mathbf{\\dot{\\phi} (t)}\\)' : '\\(\\mathbf{\\phi (t)}\\)',
+        label: { fontSize: 16 }
+      });
+
+
+    }
+
+
+    function toggleList(inputList) {
+      for (let iloop = 0; iloop < inputList.length; iloop++) {
+        if (JXG.exists(inputList[iloop])) {
+          if (inputList[iloop].getAttribute("visible")) {
+            inputList[iloop].setAttribute({ visible: false });
+          } else {
+            inputList[iloop].setAttribute({ visible: true });
+            inputList[iloop].show();
+          }
+          inputList[iloop].update();
+        }
+      }
+    }
+
+  </script>
+
+  </p>
+
+</body>
+
+</html>

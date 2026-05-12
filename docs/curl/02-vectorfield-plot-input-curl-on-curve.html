@@ -1,0 +1,270 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    #jxgbox {
+      width: 500px;
+      height: 500px;
+      margin: 20px auto;
+    }
+
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Angular velocity</title>
+</head>
+
+<body>
+
+  <h1>Show vector fields</h1>
+  <div id="jxgbox" class="jxgbox" style="width:600px; height:600px;"></div>
+  <br clear="all">
+  <script language="JavaScript">
+    "use strict";
+    JXG.Options.text.useMathJax = true;
+
+    var jxgbox = document.getElementById('jxgbox');
+
+    var s, o;
+    var board, point;
+    var f, fx, fy, ftxt, field = [], fxdytxt, fydxtxt;
+    var inputfx, inputfy;
+    var curveC, glider, inputcurvx, inputcurvy, slidercurvt, tmin, tmax,
+      kx, ky, transrot, phiDotFun, phiDottxt, polygon, polygon2, p2, p, deltax, deltay, angle;
+    var bFieldT, bFieldS, bTraject, bCurve, bEx1, bEx2, bEx3;
+
+    var init = function () {
+      board = JXG.JSXGraph.initBoard(jxgbox, {
+        axis: true,
+        boundingbox: [-5, 5, 5, -5],
+        pan: {
+          enabled: true,
+          needTwoFingers: true
+    },
+        browserPan: true
+
+      });
+      tmin = 0;
+      tmax = 6.28;
+      deltax = 0.75;
+      deltay = 0.75;
+      inputfx = board.create('input', [-4.1, 4.5, 'cos(y)', '\\(V_x(x,y)=\\)']);
+      inputfy = board.create('input', [-4.1, 4.1, 'sin(x)', '\\(V_y(x,y)=\\)']);
+      inputcurvx = board.create('input', [-4.1, -3.3, 'cos(t)', '\\(k_x(t)=\\)']);
+      inputcurvy = board.create('input', [-4.1, -3.7, 'sin(t)', '\\(k_y(t)=\\)']);
+      slidercurvt = board.create('slider', [[1, -3.7], [4, -3.7], [0, (tmax - tmin) / 5, tmax]]);
+
+      s = board.create('slider', [
+        [1.1, 4.7],
+        [3.1, 4.7],
+        [0, 0.5, 1]
+      ], {
+        name: 'length'
+      });
+      o = board.create('slider', [
+        [1.1, 4.3],
+        [3.1, 4.3],
+        [0, 0.25, 1]
+      ], {
+        name: 'opacity'
+      });
+
+      bFieldT = board.create('button', [-2.5, 3.5, "vector field",
+      function () { toggleList([field]); }
+  ],
+        { fixed: true }
+      );
+
+      bFieldS = board.create(
+        "button",
+        [-4.1, 3.5, "set vector field",
+        function () { setVectorfield(); setCurl(); }
+    ],
+        { fixed: true }
+      );
+      bCurve = board.create("button", [-4.1, -4.1, "set curve",
+      function () { setCurve(); setCurl(); }
+  ],
+        { fixed: true }
+      );
+      bEx1 = board.create("button", [-4.1, -4.5, "Example 1",
+      function () { inputfx.set('-y'); inputfy.set('x'); plot(); }
+  ],
+        { fixed: true }
+      );
+      bEx2 = board.create("button", [-2.5, -4.5, "Example 2",
+      function () { inputfx.set('-y/(x^2+y^2)'); inputfy.set('x/(x^2+y^2)'); plot(); }
+  ],
+        { fixed: true }
+      );
+      bEx3 = board.create("button", [-0.9, -4.5, "Example 3",
+      function () { inputfx.set('-y/sqrt(x^2+y^2)'); inputfy.set('x/sqrt(x^2+y^2)'); plot(); }
+  ],
+        { fixed: true }
+      );
+
+      bTraject = board.create("button", [-2.5, -4.1, "curve",
+      function () { toggleList([curveC, point, inputcurvx, inputcurvy]); }
+  ],
+        { fixed: true }
+      );
+    };
+
+    var plot = function () {
+      setCurve();
+      setVectorfield();
+      setCurl();
+    };
+
+    var setVectorfield = function () {
+
+      board.removeObject([field]);
+      fx = board.jc.snippet(inputfx.Value(), true, 'x,y');
+      fy = board.jc.snippet(inputfy.Value(), true, 'x,y');
+      ftxt = '[' + inputfx.Value() + ',' + inputfy.Value() + ']';
+      ftxt = ftxt.replace(/x/g, "x[0]");
+      ftxt = ftxt.replace(/y/g, "x[1]");
+      fxdytxt = board.jc.manipulate(("D(" + inputfx.Value() + ",y);"));
+      fydxtxt = board.jc.manipulate(("D(" + inputfy.Value() + ",x);"));
+      phiDottxt = "(" + fydxtxt + "-(" + fxdytxt + "))/2";
+      phiDotFun = board.jc.snippet(phiDottxt, true, "x,y");
+
+      field = board.create('vectorfield', [
+        [fx, fy],
+        [-4, 20, 4],
+        [-4, 20, 4]], {
+        strokeWidth: 1.5,
+        highlightStrokeWidth: 0.5,
+        strokeColor: JXG.palette.red,
+        strokeOpacity: () => o.Value(),
+        highlightStrokeColor: JXG.palette.red,
+        highlightStrokeOpacity: () => o.Value(),
+        scale: () => s.Value(),
+        arrowHead: {
+          enabled: true,
+          size: 8,
+          angle: Math.PI / 16
+        },
+        visible: true
+      });
+    };
+
+    var setCurve = function () {
+
+      board.removeObject([curveC, glider]);
+      // generate functions to plot assigned curve
+      kx = board.jc.snippet(inputcurvx.Value(), true, 't');
+      ky = board.jc.snippet(inputcurvy.Value(), true, 't');
+      curveC = board.create('curve', [kx, ky, tmin, tmax], { strokeWidth: 2 });
+      glider = board.create('point', [() => kx(slidercurvt.Value()), () => ky(slidercurvt.Value())],
+        { label: { visible: false } });
+      // generatet function used in Numerics.rungeKutta
+      f = board.jc.snippet(ftxt, true, 't,x');
+
+    };
+
+    var setCurl = function () {
+
+      board.removeObject([polygon, polygon2, p2, p, transrot, angle]);
+      transrot = board.create('transform', [() => (phiDotFun(glider.X(), glider.Y())), glider], { type: 'rotate' });
+
+      // define box around the glider
+      p = [];
+      p.push(board.create("point", [() => glider.X(), () => glider.Y() - deltay],
+        { visible: false, label: { visible: false } }));
+      p.push(board.create("point", [() => glider.X(), () => glider.Y() + deltay], { visible: false }));
+      p.push(board.create("point", [() => glider.X() + deltax, () => glider.Y()], {
+        visible: true,
+        strokeOpacity: 0.1,
+        name: ""
+      }));
+      p.push(board.create("point", [() => glider.X() - deltax, () => glider.Y()], { visible: false }));
+      // define rotating box
+      p2 = [];
+      p.forEach(
+        (ploc) => p2.push(board.create("point", [ploc, transrot],
+          { strokeColor: JXG.palette.blue, fillColor: JXG.palette.blue, visible: false }))
+      );
+      p2[2].setAttribute({ visible: true, label: { visible: false } });
+
+      polygon = [];
+      polygon.push(board.create("line", [p[0], p[1]], { strokeOpacity: 0.3, straightFirst: false, straightLast: false }));
+      polygon.push(board.create("line", [p[2], p[3]], { strokeOpacity: 0.3, straightFirst: false, straightLast: false }));
+      polygon2 = [];
+      polygon2.push(board.create("line", [p2[0], p2[1]], { straightFirst: false, straightLast: false }));
+      polygon2.push(board.create("line", [p2[2], p2[3]], { straightFirst: false, straightLast: false }));
+      angle = board.create('angle', [p[2], glider, p2[2]], {
+        radius: deltax * 0.75,
+        name: '\\(\\mathbf{\\dot\\varphi(t)}\\)',
+        label: { fontSize: 16 }
+      });
+    };
+
+    init();
+    plot();
+    /* notes on rotation
+       \dot{\phi}(t) = \frac12\left(\frac{\partial}{\partial x}V_y -\frac{\partial}{\partial y}V_x\right) (\mathbf{k(t)})
+       denotes the angular velocity at time \(t\) at the point \(k(t)\in\mathbb{R}^2\).
+       From that we obtain
+       \phi(t) =
+
+       <code>
+       phiInttxt = phiDottxt.replace(/y/g,inputcurvy.Value()).replace(/x/g,inputcurvx.Value())
+       var h = curveh.Value();
+        var N = curveN.Value();
+        Die Zeit wird mit integriert, deshalb wird gewählt
+        integrand=board.jc.snippet("["+phiInttxt+"]",true,'t,x')
+        erg = JXG.Math.Numerics.rungeKutta('heun', [0], [tmin, tmax], 50, integrand);
+         erg = JXG.Math.Numerics.rungeKutta('heun', [0], [tmin, tmax], 50, integrand);
+       </code>
+    */
+
+
+
+    function toggleList(inputList) {
+
+      let suspended = false;
+      let lboard = [];
+      for (let iloop = 0; iloop < inputList.length; iloop++) {
+        if (JXG.exists(inputList[iloop])) {
+          if (!(suspended)) {
+            if (inputList[iloop].is3D) {
+              lboard = inputList[iloop].view.board;
+            }
+            else {
+              lboard = inputList[iloop].board;
+            }
+            lboard.suspendUpdate();
+            suspended = true;
+          }
+          if (inputList[iloop].getAttribute("visible")) {
+            inputList[iloop].setAttribute({
+              visible: false
+            });
+          } else {
+            inputList[iloop].setAttribute({
+              visible: true
+            });
+            inputList[iloop].show();
+          }
+        }
+      }
+      lboard.unsuspendUpdate();
+    }
+
+  </script>
+
+  </p>
+
+</body>
+
+</html>
