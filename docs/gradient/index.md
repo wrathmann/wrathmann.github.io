@@ -20,6 +20,7 @@ Partial derivatives, gradient and tangential plane are central subjects in multi
 - [Gliding implicit curve](./PartielleAbleitung.html)
 - [Directional derviative h-method](Richtungsableitung-3D-h-Methode-Input.html)
 - [Tangential plane](./Tangentialebene-input.html)
+- [Directional derivative and tangential plane](./DirectionalDerivative+Tangentialplane.html)
 
 The ideas where shown in the talk of Meike Akveld and Wigand Rathmann at the International Meeting of the STACK Community 2025 in Durham 
 ([Program, Tuesday](https://sites.google.com/view/stack2025/schedule#h.82bngy1zy28l))
