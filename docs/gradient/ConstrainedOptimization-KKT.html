@@ -1,0 +1,372 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+
+  <!--
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/beta/jsxgraphcore.js">
+  </script>
+  <script type="text/javascript" charset="UTF-8" src="../../jsxgraph-main/distrib/jsxgraphcore.js">
+  </script>
+  <script type='module' src='./jsxgraph-main/src/jsxgraph.js'></script>
+  <link rel="stylesheet" type="text/css" href=../../jsxgraph-main/distrib/jsxgraph.css" />
+  -->
+  <script type="text/javascript" charset="UTF-8" src="https://jsxgraph.org/beta/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Zulässige Menge</title>
+</head>
+
+<body>
+
+
+  <table style="width: 100;">
+    <tr>
+      <td>
+        <div id="jxgbox" class="jxgbox construct" style="width: 600px;height: 600px;"></div>
+      </td>
+    </tr>
+  </table>
+
+</body>
+<!--
+<script type="module">
+  import JXG from '../../jsxgraph-main/src/index.js';
+  -->
+
+<script>
+  "use strict";
+
+  JXG.Options.text.useMathJax = true;
+  //JXG.Options.curve.RDPsmoothing = true;
+
+  var board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [-1.2, 5, 5, -1.2],
+    keepaspectratio: true,
+    axis: true,
+    pan: {
+      enabled: false,       // needed in 3d to turn objects
+      needTwoFingers: true, // panning is done with two fingers on touch devices
+      needShift: true      // mouse panning needs pressing of the shift key
+    },
+    //                browserPan: false,
+    zoom: {
+      enabled: true
+    }
+  });
+
+  var normButton = board.create("checkbox",
+    [4, -0.5, "normalize gradients", () => board.update()],
+    { frozen: true });
+  // initialisieren Zielfunktion
+  var niveauline, niveauh, niveauopac, niveaumin, niveaumax, cf,
+    niveaunum = 7,
+    nivevaukorr = 0.1,
+    legend;
+  //var objectivetxt = '-(x^2+y^2/4)/2';
+  var objectivetxt = 'cos(x)*sin(y)';
+  var ffun, txt2, gradf, gradfx, gradfy;
+  var txtfx, txtfy;
+  var gitxt = [], gipenalty = [], gi = [], ineq = [], clip = [], giinverse = [];
+  /* Restriktionen als Kuven angeben */
+  var gitxtx = [], gitxty = [], gitxtdx = [], gitxtdy = [], ginum, gigradx = [], gigrady = [], gigrad = [];
+
+  gitxt = ['-x+3', '0', 'x'];
+  giinverse = [false, true, false];
+  gipenalty = [1, 1, 500];
+
+  /*
+    Build gradients for constraints
+  */
+  ginum = gitxt.length;
+  for (let iloop = 0; iloop < ginum; iloop++) {
+    gitxtdx.push(board.jc.manipulate("D(" + gitxt[iloop] + ",x);"));
+    let help = 1 / gipenalty[iloop];
+    gitxtdy.push(help.toFixed(5));
+    if (giinverse[iloop]) {
+      gitxtdy[iloop] = '-(' + gitxtdy[iloop] + ')';
+    } else {
+      gitxtdx[iloop] = '-(' + gitxtdx[iloop] + ')';
+    }
+    gigradx.push(board.jc.snippet(gitxtdx[iloop], true, "x,y"));
+    gigrady.push(board.jc.snippet(gitxtdy[iloop], true, "x,y"));
+  }
+  plotIneq();
+  setObjective();
+  plotFun();
+
+  /* call plotIneq first, array clip needs to be generated first */
+  var pointSol = board.create("point", [1, 1],
+    {
+      name: '\\((x_0,y_0)\\)',
+      label: {
+        strokeColor: JXG.palette.red,
+        fontSize: 20,
+        anchorX: 'right',
+        anchorY: 'bottom',
+        offset: [0,5]
+      }
+
+    });
+
+  var pointSolfollow = board.create("point", [0, 0],
+    { name: '', visible: false, layer: 1 });
+  pointSol.on("down", () => {
+    pointSolfollow.setAttribute({ visible: true });
+    pointSol.setAttribute({ withLabel: false });
+  });
+  pointSol.on("drag", function () {
+    let result = updateFollow();
+    pointSolfollow.coords.setCoordinates(JXG.COORDS_BY_USER, result[0].usrCoords);
+    return 0;
+  }
+  );
+  pointSol.on("up", function () {
+    let result = updateFollow();
+    pointSol.coords.setCoordinates(JXG.COORDS_BY_USER, result[0].usrCoords);
+    pointSol.update();
+    pointSolfollow.setAttribute({ visible: false });
+    pointSol.setAttribute({ withLabel: true });
+    board.update();
+    return 0;
+  }
+  );
+
+  /* initialize postion of pointSol and pointSolfollow */
+  pointSol.coords.setCoordinates(JXG.COORDS_BY_USER, updateFollow()[0].usrCoords);
+  pointSolfollow.coords.setCoordinates(JXG.COORDS_BY_USER, updateFollow()[0].usrCoords);
+  pointSolfollow.setAttribute({ visible: false });
+  pointSol.update();
+  board.update();
+
+
+  gradf = board.create("arrow",
+    [pointSolfollow,
+      () => {
+        let gradfxloc = gradfx(pointSolfollow.X(), pointSolfollow.Y());
+        let gradfyloc = gradfy(pointSolfollow.X(), pointSolfollow.Y());
+        let normgrad = 1;
+        if (normButton.Value()) { normgrad = Math.max(0.0001, Math.sqrt(gradfxloc ** 2 + gradfyloc ** 2)); }
+        return [pointSolfollow.X() - gradfxloc / normgrad,
+        pointSolfollow.Y() - gradfyloc / normgrad];
+      },
+    ],
+    {
+      name: '\\(-\\nabla f(x_0,y_0)\\)',
+      strokeColor: JXG.palette.red,
+      withLabel: true,
+      strokeWidth: 3,
+      layer: 10,
+      label: {
+        strokeColor: JXG.palette.red,
+        fontSize: 20,
+        anchorX: 'right',
+        anchorY: 'middle'
+      },
+      visible: () => {
+        if ((gradfx(pointSolfollow.X(), pointSolfollow.Y()) ** 2 + gradfy(pointSolfollow.X(), pointSolfollow.Y()) ** 2) < 0.01) { return false; }
+        else { return true; }
+      }
+    });
+
+  /* construct line perpendicular to negativ gradient 
+  */
+  var help1 = board.create("point",
+    [() => {
+      let gradfxloc = gradfx(pointSolfollow.X(), pointSolfollow.Y());
+      let gradfyloc = gradfy(pointSolfollow.X(), pointSolfollow.Y());
+      let normgrad = Math.max(0.0001, Math.sqrt(gradfxloc ** 2 + gradfyloc ** 2));
+      return [pointSolfollow.X() + gradfyloc / normgrad,
+      pointSolfollow.Y() - gradfxloc / normgrad];
+    }
+    ], { name: 'helper1', visible: false }
+  );
+  var help2 = board.create("point",
+    [() => {
+      let gradfxloc = gradfx(pointSolfollow.X(), pointSolfollow.Y());
+      let gradfyloc = gradfy(pointSolfollow.X(), pointSolfollow.Y());
+      let normgrad = Math.max(0.0001, Math.sqrt(gradfxloc ** 2 + gradfyloc ** 2));
+      return [pointSolfollow.X() - gradfyloc / normgrad,
+      pointSolfollow.Y() + gradfxloc / normgrad];
+    }
+    ], { name: 'helper2', visible: false }
+  );
+
+  var a = board.create('angle',
+    [help2, pointSolfollow, help1],
+    {
+      layer: 7,
+      name: '',
+      visible: () => {
+        if ((gradfx(pointSolfollow.X(), pointSolfollow.Y()) ** 2 + gradfy(pointSolfollow.X(), pointSolfollow.Y()) ** 2) < 0.01) { return false; }
+        else { return true; }
+      }
+    });
+  for (let iloop = 0; iloop < ginum; iloop++) {
+    gigrad.push(board.create("arrow",
+      [pointSolfollow,
+        () => {
+          let gigradxloc = gigradx[iloop](pointSolfollow.X(), pointSolfollow.Y());
+          let gigradyloc = gigrady[iloop](pointSolfollow.X(), pointSolfollow.Y());
+          let normgrad = 1;
+          if (normButton.Value()) { normgrad = Math.max(0.0001, Math.sqrt(gigradxloc ** 2 + gigradyloc ** 2)); }
+          return [
+            pointSolfollow.X() + gigradxloc / normgrad,
+            pointSolfollow.Y() + gigradyloc / normgrad]
+        }
+      ],
+      {
+        strokeColor: JXG.palette.skyblue,
+        visible: () => pointSolfollow.isOn(gi[iloop]),
+        layer: 10,
+        withLabel: true,
+        name: '\\(\\nabla g_{' + iloop + '}' + '(x_0,y_0)\\)',
+        label: {
+          strokeColor: JXG.palette.skyblue, fontSize: 20
+        }
+      }));
+  }
+
+
+  /* Punkt auf dem Rand der zulässigen Menge */
+  /*
+  var pointGlid = board.create("glider",[7.5,15,clip3]);
+  var txt = board.create('text', [1, -0.5, function () {
+    return 'Point A is inside of the polygon = ' +
+      JXG.Math.Geometry.pnpoly(pointSol.X(), pointSol.Y(), clip[clip.length - 1].points, JXG.COORDS_BY_USER, board);
+  }]);
+  */
+
+  function plotIneq() {
+    gi = [];
+    ineq = [];
+    clip = [];
+    for (let iloop = 0; iloop < gitxt.length; iloop++) {
+      /* function graph of inequalities */
+      gi.push(board.create('functiongraph', [gipenalty[iloop].toFixed(2) + '*(' + gitxt[iloop] + ')'], {
+        strokeColor: JXG.palette.skylue,
+        strokeWidth: 3,
+        //        layer: 9
+      }));
+      /* generate inequality */
+      ineq.push(board.create('inequality', [gi[iloop]], { visible: false, inverse: giinverse[iloop] }));
+    }
+
+    clip[0] = board.create('curveintersection', [ineq[0], ineq[1]], {
+      fillColor: JXG.palette.skyblue,
+      fillOpacity: 0.5,
+      highlightFillColor: JXG.palette.skyblue,
+      highlightFillOpacity: 0.3,
+      visible: false
+    });
+
+    for (let iloop = 1; iloop < gitxt.length - 1; iloop++) {
+      clip.push(board.create('curveintersection', [clip[iloop - 1], ineq[iloop + 1]], {
+        fillColor: JXG.palette.skyblue,
+        fillOpacity: 0.5,
+        highlightFillColor: JXG.palette.skyblue,
+        highlightFillOpacity: 0.5,
+        visible: false,
+        RDPsmoothing: true
+      }));
+    }
+    /*console.log(clip[clip.length - 1].points.length);*/
+    clip[clip.length - 1].setAttribute({ visible: true });
+  }
+
+  function updateFollow() {
+    let resultarr = [], result = [];
+    let flagInner = JXG.Math.Geometry.pnpoly(pointSol.X(), pointSol.Y(), clip[clip.length - 1].points, JXG.COORDS_BY_USER, board);
+    // console.log('up: ', pointSol.X(), pointSol.Y(), flagInner)
+    if (flagInner) {
+      resultarr = [pointSol.coords.usrCoords[1], pointSol.coords.usrCoords[2]];
+      result[0] = pointSol.coords;
+    }
+    else {
+      result = JXG.Math.Geometry.projectPointToCurve(pointSol, clip[clip.length - 1], board);
+      resultarr = [result[0].usrCoords[1], result[0].usrCoords[2]];
+    }
+    return result;
+  }
+  function plotFun() {
+    var i;
+    board.removeObject([cf, niveauopac]);
+    /* let i = 1; i <= niveaunum; i++*/
+    niveauline = [];
+    niveauopac = [];
+    cf = [];
+    for (i = 0; JXG.Math.lt(i, niveaunum); i++) {
+      let niveaui = niveaumin + (i) * niveauh;
+      niveauline.push(niveaui.toFixed(2));
+      niveauopac.push(((6 + i) / (niveaunum + 5)) * 0.5);
+      cf.push(board.create("implicitcurve", [
+        objectivetxt + "-(" + niveaui.toFixed(2) + ")", [-1, 4],
+        [-1, 4]
+      ], {
+        strokeWidth: 2,
+        strokeColor: '#000000', /*JXG.palette.black*/
+        highlightStrokeColor: '#000000', /*JXG.palette.black*/
+        highlightStrokeOpacity: niveauopac[i],
+        strokeOpacity: niveauopac[i],
+        needsRegularUpdate: false,
+        name: "niveau"
+      }));
+    }
+    /*console.log(niveauopac);*/
+    legend = board.create('legend', [4.1, 4.5],
+      {
+        labels: niveauline,
+        colors: [JXG.palette.black],
+        strokeOpacity: niveauopac,
+        rowHeight: 15,
+        lineLength: 0.25,
+        frozen: true
+      }
+    );
+  };
+
+  function setObjective() {
+    ffun = board.jc.snippet(objectivetxt, true, "x,y");
+    txtfx = board.jc.manipulate("D(" + objectivetxt + ",x);");
+    txtfy = board.jc.manipulate("D(" + objectivetxt + ",y);");
+    gradfx = board.jc.snippet(txtfx, true, "x,y");
+    gradfy = board.jc.snippet(txtfy, true, "x,y");
+    /* compute niveaumin, niveaumax */
+    var minx = -1,
+      miny = -1,
+      maxx = 4,
+      maxy = 4,
+      hx = 0.2,
+      hy = 0.2;
+    niveaumax = -100000;
+    niveaumin = 100000;
+    for (let xloop = minx; xloop < maxx; xloop += hx) {
+      for (let yloop = miny; yloop < maxy; yloop += hy) {
+        let fval = ffun(xloop, yloop);
+        if (niveaumax < fval) {
+          niveaumax = fval;
+        }
+        if (niveaumin > fval) {
+          niveaumin = fval;
+        }
+      }
+    }
+    niveaumin = niveaumin + nivevaukorr;
+    niveaumax = niveaumax - nivevaukorr;
+    niveauh = (niveaumax - niveaumin) / (niveaunum - 1);
+  }
+
+</script>
+<footer></footer>
+
+</html>
