@@ -1,0 +1,112 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Regression line </title>
+</head>
+
+<body>
+
+  <h1>Regression line used as tangent</h1>
+
+  <p>
+
+  </p>
+  <table style="width: 100%">
+    <tr>
+      <td align="center">
+        <div id="jxgbox" class="jxgbox construct" style="width: 500px;height: 500px;margin:0 auto;"></div>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+<script>
+  "use strict";
+
+
+  JXG.Options.text.useMathJax = true;
+
+  var dataX = [], dataY = [];
+  var storeSketchPoints = [], storeSketch, storeConvHull, storeConvHull2, storeSketchCoords = [];
+
+  var board = JXG.board('jxgbox', {
+    boundingbox: [-2, 2, 2, -2],
+    keepaspectratio: true,
+    axis: true,
+    pan: {
+      enabled: false,       // needed in 3d to turn objects
+      needTwoFingers: true, // panning is done with two fingers on touch devices
+      needShift: true // mouse panning needs pressing of the shift key
+    },
+    //                browserPan: false,
+    zoom: {
+      enabled: true
+    },
+    sketches: {
+      enabled: true,
+      0: { visible: true, strokeWidth: 2, deleteOnUp: false },
+      1: { strokeWidth: 3 }
+    }
+  });
+
+
+  var funcGraph;
+  var funcGraph2 = board.create("functiongraph", ['sin(x)'], {
+    strokeWidth: 3,
+    strokeColor: JXG.palette.green
+  });
+
+  // detect sketch
+  board.on('down', function (evt) {
+    // Do not sketch during dragging
+    if (board.mode !== board.BOARD_MODE_NONE) {
+      this.isSketching[0] = false;
+    }
+  });
+
+
+  board.on('up', function (evt) {
+
+    board.removeObject([storeSketch, funcGraph]);
+
+    storeSketchCoords = board.sketch.getCoords();
+    /* store coordinates x and y separate */
+    dataX = storeSketchCoords.map(p => p[1]);
+    dataY = storeSketchCoords.map(p => p[2]);
+    let regression = JXG.Math.Numerics.regressionPolynomial(1, dataX, dataY);
+    funcGraph = board.create('functiongraph', [regression, -2, 2],
+      {
+        visible: true,
+        strokeWidth: 3,
+        fixed: true,
+        strokeColor: JXG.palette.blue
+      });
+
+
+    if (true) {
+      storeSketch = board.create('curve', [storeSketchCoords], {
+        strokeColor: JXG.palette.red,
+        strokeWidth: 2,
+        strokeopacity: 0.2
+      });
+    }
+
+  });
+
+</script>

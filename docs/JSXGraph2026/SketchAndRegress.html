@@ -1,0 +1,135 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Fit to sketch</title>
+</head>
+
+<body>
+
+  <h1>Function Sketching and Polynomial Fitting</h1>
+
+  <p>
+    Just sketch an arbitrary function, from left to right.
+  </p>
+  <p>
+    You will see the regression polynomial up to fifth degree. Adjust the degree between zero and five.
+  </p>
+  <table style="width: 100%">
+    <tr>
+      <td align="center">
+        <div id="jxgbox" class="jxgbox construct" style="width: 500px;height: 500px;margin:0 auto;"></div>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+<script>// type="module">
+  'use strict';
+  //import JXG from '../jsxgraph-main/src/index.js';
+
+  JXG.Options.text.useMathJax = true;
+
+  var dataX = [], dataY = [];
+  var storeSketch, storeSketchCoords = [];
+
+  var board = JXG.board('jxgbox', {
+    boundingbox: [-2, 2, 2, -2],
+    keepaspectratio: true,
+    axis: true,
+    pan: {
+      enabled: false,       // needed in 3d to turn objects
+      needTwoFingers: true, // panning is done with two fingers on touch devices
+      needShift: true // mouse panning needs pressing of the shift key
+    },
+    //                browserPan: false,
+    zoom: {
+      enabled: true
+    },
+    sketches: {
+      enabled: true,
+      0: { visible: true, strokeWidth: 2, deleteOnUp: false },
+      1: { strokeWidth: 3 }
+    }
+  });
+
+
+  var funcGraph, regression;
+
+  // detect sketch
+  board.on('down', function (evt) {
+    // Do not sketch during dragging
+    if (board.mode !== board.BOARD_MODE_NONE) {
+      this.isSketching[0] = false;
+    }
+  });
+
+  var sliderRegDegree = board.create("slider", [[0.5, -1], [1.5, -1], [0, 3, 5]], {
+    snapWidth: 1,
+    digits: 0,
+    name: 'deg'
+  });
+
+  var textRegression = board.create('text', [-1.25, -1.25, () => {
+    try { return 'reg(x)=' + regression.getTerm(); }
+    catch { return " "; }
+  }], {
+    fontSize: 16,
+    useasciimathml: true,
+    frozen: true,
+    fixed: true
+  });
+
+  var sliderRegDegreeFlag = false;
+  sliderRegDegree.on('down', function () {
+    sliderRegDegreeFlag = true;
+  });
+
+  board.on('up', function (evt) {
+
+    if (sliderRegDegreeFlag) {
+      sliderRegDegreeFlag = false;
+      return;
+    }
+    board.removeObject([storeSketch, funcGraph]);
+
+    storeSketchCoords = board.sketch.getCoords();
+    /* store coordinates x and y separate */
+    dataX = storeSketchCoords.map(p => p[1]);
+    dataY = storeSketchCoords.map(p => p[2]);
+    if (dataX.length > 6) {
+      regression = JXG.Math.Numerics.regressionPolynomial(() => sliderRegDegree.Value(), dataX, dataY);
+      funcGraph = board.create('functiongraph', [regression, -2, 2],
+        {
+          visible: true,
+          strokeWidth: 2,
+          fixed: true,
+          strokeColor: JXG.palette.red
+        });
+    }
+
+    if (true) {
+      storeSketch = board.create('curve', [storeSketchCoords], {
+        strokeColor: JXG.palette.blue,
+        strokeWidth: 3
+      });
+    }
+
+  });
+
+</script>

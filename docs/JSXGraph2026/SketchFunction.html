@@ -1,0 +1,218 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+
+  <title>Function</title>
+</head>
+
+<body>
+
+  <h1>Sketch Functions</h1>
+<p>
+  Draw the graph of $$ f(x) = -\frac{1}{2}x^2 + 1 $$.
+</p>
+<p>
+  Sketch the function from left to right. The sketch is clipped to increasing x-values,
+  and the resulting interval estimates the difference between your sketch and the function.
+</p>
+  <table style="width: 100%">
+    <tr>
+      <td align="center">
+        <div id="jxgbox" class="jxgbox construct" style="width: 500px;height: 500px;margin:0 auto;"></div>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+<script>// type="module">
+  'use strict';
+  //import JXG from '../jsxgraph-main/src/index.js';
+  JXG.Options.text.useMathJax = true;
+  var funtxt;
+  funtxt = '-(x-4)^2/2-2';
+  funtxt = '-(x-0)^2/2+1';
+  /* a reference sketch for experiments */
+  var diffSketchFun = 0;
+  var closedCurve, closedCurve3, pointsSketchCoords, splineSketchX = [], splineSketchY = [], clippedSketchCoords = [], clippedSketchCurve;
+  var storeSketchPoints = [], storeSketch, storeConvHull, storeConvHull2, storeSketchCoords = [];
+
+  var board = JXG.board('jxgbox', {
+    boundingbox: [-2, 2, 2, -2],
+    keepaspectratio: true,
+    axis: true,
+    pan: {
+      enabled: false,       // needed in 3d to turn objects
+      needTwoFingers: true, // panning is done with two fingers on touch devices
+      needShift: true // mouse panning needs pressing of the shift key
+    },
+    //                browserPan: false,
+    zoom: {
+      enabled: true
+    },
+    sketches: {
+      enabled: true,
+      0: { visible: true, strokeWidth: 2, deleteOnUp: false },
+      1: { strokeWidth: 3 }
+    }
+  });
+
+
+  // Funktionsgraphen zeichnen mit Wertetabelle
+  // Punte für Funktionswerte verschieben
+  var point1 = board.create('point', [-1, 0.5], { face: 'x' });
+  var point2 = board.create('point', [-0.5, 0.5], { face: 'x' });
+  var point3 = board.create('point', [0, 0.5], { face: 'x' });
+  var point4 = board.create('point', [0.5, 0.5], { face: 'x' });
+
+  var isFuncGraphVis = false;
+  var isClippedSketchVis = false;
+  var isDiffVis = false;
+  var showFuncGraph = board.create('button', [0.75, -1.5, 'Show graph', function () { }]);
+  var showClippedSketch = board.create('button', [0.05, -1.5, 'Show diff', function () { }]);
+  var textIntErrorEst = board.create('text', [-1.75, -1.5, function () {
+    let a = (typeof splineSketchX[0] === 'undefined') ? 0.0 : splineSketchX[0].toFixed(2);
+    let b = (typeof splineSketchX[0] === 'undefined') ? 0.0 : splineSketchX[splineSketchX.length - 1].toFixed(2);
+    return '\\(\\int\\limits_{' + a + '}^{' + b + '} |f(x)-s(x)|\\  dx \\approx\\) ' + diffSketchFun.toFixed(4);
+  }],
+    { fixed: true });
+
+  showFuncGraph.rendNodeButton.onpointerover = function () {
+    funcGraph.setAttribute({ visible: true });
+  };
+  showFuncGraph.rendNodeButton.onpointerleave = function () {
+    funcGraph.setAttribute({ visible: false });
+  };
+  showClippedSketch.rendNodeButton.onpointerover = function () {
+    if (JXG.exists(closedCurve3)) {
+      closedCurve3.setAttribute({ visible: true });
+    }
+  };
+  showClippedSketch.rendNodeButton.onpointerleave = function () {
+    if (JXG.exists(closedCurve3)) {
+      closedCurve3.setAttribute({ visible: false });
+    }
+  };
+
+  var funcGraph = board.create('functiongraph', [funtxt, -2, 2],
+    {
+      visible: () => { return isFuncGraphVis; },
+      strokeWidth: 2
+    });
+  var funf = board.jc.snippet(funtxt, true, 'x');
+
+  var pointsFunCoords = funcGraph.points.map(p => [p.usrCoords[1], p.usrCoords[2]]);
+
+
+  // detect sketch
+  board.on('down', function (evt) {
+    // Do not sketch during dragging
+    if (board.mode !== board.BOARD_MODE_NONE) {
+      this.isSketching[0] = false;
+    }
+  });
+
+
+  board.on('up', function (evt) {
+
+    board.removeObject([storeSketch, storeConvHull, storeConvHull2, clippedSketchCurve]);
+
+    storeSketchCoords = board.sketch.getCoords();
+    /* store coordinates x and y separate */
+    splineSketchX = storeSketchCoords.map(p => p[1]);
+    splineSketchY = storeSketchCoords.map(p => p[2]);
+    pointsSketchCoords = storeSketchCoords.map(p => [p[1], p[2]]);
+    clippedSketchCoords = pointsSketchCoords;
+
+
+
+    if (true) {
+      storeSketch = board.create('curve', [storeSketchCoords], {
+        strokeColor: JXG.palette.blue,
+        strokeWidth: 3
+      });
+    }
+
+    let temp1 = JXG.Math.Geometry.convexHull(storeSketchCoords, true);
+    if (false) {
+      storeConvHull2 = board.create('polygon', temp1, { withLines: false, vertices: { visible: false } });
+    }
+
+    if (false) {
+      temp1.push(temp1[0]); // Close the curve
+      storeConvHull = board.create('curve', [temp1], {
+        strokeColor: JXG.palette.skyblue,
+        strokeWidth: 3
+      });
+    }
+
+    /* Daten werden bereinigt, so dass nur aufsteigende x-Werte vorhanden sind */
+    var iloop = 1;
+    while (iloop < splineSketchX.length) {
+      if (splineSketchX[iloop - 1] >= splineSketchX[iloop]) {
+        splineSketchX.splice(iloop, 1);
+        splineSketchY.splice(iloop, 1);
+        clippedSketchCoords.splice(iloop, 1);
+      }
+      else {
+        iloop += 1;
+      }
+
+    }
+
+    clippedSketchCurve = board.create("curve", [splineSketchX, splineSketchY],
+      {
+        strokeColor: JXG.palette.orange,
+        strokeWidth: 2
+      }
+    );
+
+    /* Integral zwischen Kurve als Splinen und gegebener Funktion berechnen*/
+    // accumulate the angle by trapeziodal rule
+    diffSketchFun = 0;
+    for (iloop = 0; iloop < splineSketchX.length - 1; iloop++) {
+      diffSketchFun += (splineSketchX[iloop + 1] - splineSketchX[iloop]) * (
+        Math.abs(splineSketchY[iloop + 1] - funf(splineSketchX[iloop + 1])) +
+        Math.abs(splineSketchY[iloop] - funf(splineSketchX[iloop]))
+      ) / 2;
+    }
+    /* die Reihenfolge der Punkte wird immer in Richtung der x-Achse angenommen*/
+    //var combinedPoints = [...pointsSketchCoords, ...pointsFunCoords.reverse()];
+    var combinedPoints = [...clippedSketchCoords,
+    ...pointsFunCoords.filter(p => p[0] >= splineSketchX[0]).filter(p => p[0] <= splineSketchX[splineSketchX.length - 1]).reverse()];
+    if (false) {
+      closedCurve = board.create('curve', [combinedPoints], {
+        strokeColor: 'blue',
+        closed: true
+      });
+    }
+    if (true) {
+      closedCurve3 = board.create('polygon', combinedPoints, {
+        vertices: { visible: false },
+        strokeColor: 'blue',
+        closed: true,
+        visible: () => { return isDiffVis; }
+      });
+    }
+
+
+  });
+
+</script>
+<footer></footer>
+
+</html>

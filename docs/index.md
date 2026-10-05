@@ -10,6 +10,10 @@ theme: minima
 
 # JSXGraph Example collection
 
+## Sketching 
+
+Examples showing the possibilities using `sketchCurve` object in JSXGraph [Examples JXGraph Conference 2026](./JSXGraph2026/)
+
 ## Calculus (univariate)
 - [limits of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Grenzwerte.html) 
 - [continuity of functions](https://wrathmann.github.io/JSXGraphExamples/Funktion-Folgenstetigkeit.html) 

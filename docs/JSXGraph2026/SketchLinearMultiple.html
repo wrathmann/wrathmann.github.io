@@ -1,0 +1,252 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+
+  <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    .mybuttonactiv>button {
+      appearance: auto;
+      background-color: #04AA6D;
+      border-width: 1px;
+      color: white;
+      text-align: center;
+      font-size: 16px;
+      width: 75px;
+      height: 100px;
+    }
+
+    .mybuttoninactiv>button {
+      appearance: auto;
+      background-color: buttonface;
+      border-width: 1px;
+      border-style: outset;
+      color: black;
+      text-align: center;
+      text-decoration: none;
+      width: 75px;
+      height: 25px;
+      font-size: 16px;
+    }
+  </style>
+
+  <title>Sketch a set</title>
+</head>
+
+<body>
+
+  <h1>Sketch a Simplex</h1>
+<p>
+  Given linear affine functions \( g_i(x,y) := a_i x + b_i y + c \) with \( i \in \{1, \dots, N\} \) describing the piecewise linear boundary of a set \( M \).
+</p>
+
+<p>
+  A problem could be: Sketch the set
+  \[ M := \{(x,y) \in \mathbb{R}^2 \, : \, g_i(x,y) \leqslant 0, \, i \in \{1, \dots, N\}\}. \]
+</p>
+
+  <p>
+  </p>
+  <table style="width: 100%">
+    <tr>
+      <td align="center">
+        <div id="jxgbox" class="jxgbox construct" style="width: 500px;height: 500px;margin:0 auto;"></div>
+      </td>
+    </tr>
+  </table>
+
+</body>
+
+<script>// type="module">
+  "use strict";
+
+  //import JXG from '../jsxgraph-main/src/index.js';
+
+  JXG.Options.text.useMathJax = true;
+
+  var closedCurve3, pointsSketchCoords;
+  var storeSketchPoints = [], storeSketch, storeConvHull, storeConvHull2, storeSketchCoords = [];
+  var sketchStorage = [], storageCounter = 0;
+  var debugFlag = true;
+
+  var board = JXG.board('jxgbox', {
+    boundingbox: [-1, 3, 3, -1],
+    keepaspectratio: false,
+    axis: true,
+    defaultAxes: {
+      x: {
+        withLabel: false,
+        ticks: false
+      },
+      y: {
+        withLabel: false,
+        ticks: false
+      }
+    },
+    grid: false,
+    pan: {
+      enabled: false,       // needed in 3d to turn objects
+      needTwoFingers: true, // panning is done with two fingers on touch devices
+      needShift: true // mouse panning needs pressing of the shift key
+  },
+    //                browserPan: false,
+    zoom: {
+      enabled: true
+    },
+    sketches: {
+      enabled: true,
+      0: { visible: true, strokeWidth: 2, deleteOnUp: false },
+      1: { strokeWidth: 3 }
+    }
+  });
+
+  var flagLinRegression = true;
+  var butDelMarkedSketches = board.create('button', [2, -0.5, 'remove marked',
+    function () { removeMarkedSketches(); }], { frozen: true });
+  var butLinRegression = board.create('button', [2, -0.75, 'linear regression',
+    function () {
+      flagLinRegression = !flagLinRegression;
+    }], {
+    frozen: true,
+    cssClass: () => (flagLinRegression ? 'mybuttonactiv' : 'mybuttoninactiv'),
+    highlightCssClass: 'mybuttoninactiv'
+  });
+
+
+  // detect sketch
+  board.on('down', function (evt) {
+    // Do not sketch during dragging
+    if (board.mode !== board.BOARD_MODE_NONE) {
+      this.isSketching[0] = false;
+    }
+  });
+
+
+  board.on('up', function (evt) {
+    board.removeObject([storeSketch, storeConvHull, storeConvHull2]);
+    storeSketchCoords = board.sketch.getCoords();
+    /* store coordinates x and y separate */
+    let dataX = storeSketchCoords.map(p => p[1]);
+    let dataY = storeSketchCoords.map(p => p[2]);
+    let regression = null;
+
+    if (storeSketchCoords.length > 5) {
+      storageCounter = sketchStorage.length;
+      if (flagLinRegression) {
+        regression = JXG.Math.Numerics.regressionPolynomial(1, dataX, dataY);
+      }
+      sketchStorage.push([
+        board.create('curve', [storeSketchCoords], {
+          clickValue: false,
+          idValue: storageCounter,
+          withRegLine : flagLinRegression,
+          layer : 6,
+          strokeWidth: (self) => self.evalVisProp('clickvalue') ? 5 : 3,
+          strokeColor: (self) => self.evalVisProp('withRegLine') ? JXG.palette.darkblue : JXG.palette.orange
+      }),
+        flagLinRegression ? board.create('functiongraph', [regression, -2, 3],
+          {
+            visible: true,
+            strokeWidth: 3,
+            fixed: true,
+            strokeColor: JXG.palette.skyblue
+          }) : 0,
+        storageCounter]);
+      sketchStorage[storageCounter][0].on('dblclick', function (e) {
+        selectObject(e, this);
+      });
+    }
+
+  });
+
+  function selectObject(e, object) {
+    if (debugFlag)
+      console.log(object.id, object.getAttribute('clickvalue'));
+    object.setAttribute({ clickvalue: !object.getAttribute('clickvalue') });
+    if (debugFlag)
+      console.log(object.id, object.getAttribute('clickvalue'));
+  }
+  function removeMarkedSketches() {
+    /* Liste der aktivierten Punkte*/
+    let markedSketches = [];
+    for (let iloop = 0; iloop < sketchStorage.length; iloop++) {
+      try {
+        if (sketchStorage[iloop][0].visProp.clickvalue) {
+          markedSketches.push([sketchStorage[iloop][0].id, sketchStorage[iloop][0].visProp.idvalue]);
+        }
+      }
+      catch {
+        if (debugFlag)
+          console.log(iloop, "clickvalue or idvalue missing");
+      }
+    }
+    if (debugFlag)
+      console.log(markedSketches);
+
+    /* Punkte aus sketchStorage loeschen*/
+    for (let iloop = 0; iloop < markedSketches.length; iloop++) {
+      removeSketch(markedSketches[iloop][0]);
+      /* remove regression line */
+      if (sketchStorage[iloop][1]!== 0) {
+        board.removeObject(sketchStorage[markedSketches[iloop][1]][1].id);
+      }
+      sketchStorage[markedSketches[iloop][1]][0] = [];
+      sketchStorage[markedSketches[iloop][1]][1] = [];
+      sketchStorage[markedSketches[iloop][1]][2] = -1;
+    }
+
+    /* compresse sketchStorage, update idvalue */
+    sketchStorage = sketchStorage.filter(p => p[2] >= 0);
+    for (let iloop = 0; iloop < sketchStorage.length; iloop++) {
+      sketchStorage[iloop][0].setAttribute({ idValue: iloop });
+      sketchStorage[iloop][2] = iloop;
+    }
+    return sketchStorage.length;
+  }
+
+  /* delete sketch from sketchStorage */
+  function removeSketch(key) {
+    let index = -1;
+    /* index wird nur fuer Debug ausgelesen, kann in Produktivcode raus */
+    try {
+      index = board.objects[key].visProp.idvalue;
+      if (debugFlag)
+        console.log(key, index);
+    }
+    catch {
+      if (debugFlag)
+        console.log(key, "idValue not found");
+      return index;
+    }
+
+    try {
+      if (board.objects[key].visProp.clickvalue) {
+        board.objects[key].off('dblclick');
+        board.removeObject(board.objects[key]);
+        if (debugFlag)
+          console.log(key, index, "removed");
+        return index;
+      }
+    }
+    catch {
+      if (debugFlag)
+        console.log(key, "not removed");
+      return -index;
+    }
+    return 0;
+  }
+
+</script>
+<footer></footer>
+
+</html>
