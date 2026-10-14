@@ -3,7 +3,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width">
   <script type="text/javascript" charset="UTF-8"
-    src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+        src="https://cdn.jsdelivr.net/npm/jsxgraph@1.12.2/distrib/jsxgraphcore.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
@@ -91,8 +91,8 @@
     */
     /* create type selector */
     dirtype = board.create('text', [-1, 1.8, '<select id="dirtype">' +
-      '<option value="sd" selected> steepest decent' +
-      '<option value="pj" > steepest decent with Jacobi prec' +
+      '<option value="sd" > steepest decent' +
+      '<option value="pj" selected> steepest decent with Jacobi prec' +
       '<option value="exact"> step size' +
       '<option value="newton"> Newton' +
       '</select>'], { fixed: true });
